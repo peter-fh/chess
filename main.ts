@@ -99,10 +99,13 @@ class Board {
 
 
 function drawBoard(board: Board) {
+
     const board_div = document.getElementById("board");
+
     if (board_div == null) {
 	return;
     }
+
     for (let i=0; i < 64; ++i){
 	const square = document.createElement("div");
 	square.id = "square";
