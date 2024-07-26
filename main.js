@@ -19,6 +19,17 @@ var Piece = /** @class */ (function () {
         }
         return 'w';
     };
+    Piece.prototype.getImgPath = function () {
+        var piece_type = this.type.toLowerCase();
+        var color;
+        if (this.getPieceColor(this.type) == 'w') {
+            color = "l";
+        }
+        else {
+            color = "d";
+        }
+        return "res/".concat(piece_type).concat(color, "t.png");
+    };
     return Piece;
 }());
 var Board = /** @class */ (function () {
@@ -81,6 +92,9 @@ var Board = /** @class */ (function () {
         }
         return "".concat(str);
     };
+    Board.prototype.getPieceAtSquare = function (square) {
+        return this.board[square];
+    };
     return Board;
 }());
 function drawBoard(board) {
@@ -121,6 +135,14 @@ function drawBoard(board) {
         }
         else if (i == 63) {
             square.style.borderRadius = "0px 0px 10px 0px";
+        }
+        var piece_at_square = board.getPieceAtSquare(i);
+        if (piece_at_square != ' ') {
+            var type = piece_at_square.getImgPath();
+            var piece_div = document.createElement("img");
+            piece_div.src = type;
+            piece_div.setAttribute('draggable', 'false');
+            square.appendChild(piece_div);
         }
         board_div.append(square);
         if ((i + 1) % 8 == 0) {
