@@ -57,7 +57,7 @@ class Board {
     constructor(fen: string) {
 	this.board = new Array(64);
 	this.turn = 'w';
-	this.valid_castles = [true, true, true, true]
+	this.valid_castles = [false, false, false, false]
 	this.en_passent = -1;
 	this.half_move = 0;
 	this.full_move = 0;
@@ -71,8 +71,9 @@ class Board {
 	const fen_board: string = fen_components[0];
 	const fen_turn: string = fen_components[1];
 	const fen_castling: string = fen_components[2];
-	const fen_halfmove: string = fen_components[3];
-	const fen_fullmove: string = fen_components[4];
+	const fen_en_passent: string = fen_components[3];
+	const fen_halfmove: string = fen_components[4];
+	const fen_fullmove: string = fen_components[5];
 	var i: number = 0;
 	for (const c of fen_board){
 	    if (isPiece(c)) {
@@ -104,24 +105,38 @@ class Board {
 	    this.valid_castles[3] = true;
 	}
 
+	if (fen_en_passent == "-") {
+	    this.en_passent = -1;
+	} else {
+	    this.en_passent = Board.squareToInt(fen_en_passent);
+	}
+
+	this.half_move = +fen_halfmove;
+	this.full_move = +fen_fullmove;
+
 
     }
 
-    static squareToInt(square: string){
-	
+    static squareToInt(square: string): number{
+	const row_number: number = 7 - (square.charCodeAt(0) - 'a'.charCodeAt(0)); 
+	const column_number: number = (square.charCodeAt(1) - 1) - '0'.charCodeAt(0);
+	console.log("row number for", square, ":", row_number);
+	console.log("column number for", square, ":", column_number);
+	return column_number * 8 + row_number;
+    }
+
+    static intToSquare(square: number): string {
+	const row_letter: string= String.fromCharCode('a'.charCodeAt(0) + 7 - (square % 8))
+	const column_number: number = Math.floor(square / 8) + 1;
+	console.log("row letter for", square, ":", row_letter)
+	console.log("column number for", square, ":", column_number)
+	return row_letter + column_number;
     }
 
     fen(): string {
 	var board_fen: string = "";
 	var space_counter: number = 0;
 	for(var i: number = 0; i < 64; ++i){
-	    if (i % 8 == 0 && i != 0){
-		if (space_counter > 0) {
-		    board_fen += space_counter;
-		    space_counter = 0;
-		}
-		board_fen += "/"
-	    }
 	    var c: (Piece | ' ') = this.board[i];
 	    if (c instanceof Piece) {
 		if (space_counter > 0) {
@@ -134,7 +149,47 @@ class Board {
 	    } else {
 		throw new Error("board has non-piece non-space element");
 	    }
+	    if ((i+1) % 8 == 0 && i != 0){
+		if (space_counter > 0) {
+		    board_fen += space_counter;
+		    space_counter = 0;
+		}
+		if (i != 63) {
+		    board_fen += "/"
+		}
+	    }
 	}
+	board_fen += " " + this.turn;
+
+	var castling_word = "";
+	if (this.valid_castles[0]) {
+	    castling_word += "K"; 
+	}
+	if (this.valid_castles[1]) {
+	    castling_word += "Q"; 
+	}
+	if (this.valid_castles[2]) {
+	    castling_word += "k"; 
+	}
+	if (this.valid_castles[3]) {
+	    castling_word += "q"; 
+	}
+	if (!(this.valid_castles[0] || this.valid_castles[1] || this.valid_castles[2] || this.valid_castles[3])) {
+	    if (castling_word !== "") {
+		throw new Error("Setting castling string to nil when it is non-empty");
+	    }
+	    castling_word = "-";
+	}
+
+	board_fen += " " + castling_word;
+	if (this.en_passent === -1) {
+	    board_fen += " -"
+	} else {
+	    board_fen += " " + Board.intToSquare(this.en_passent);
+	}
+	board_fen += " " + this.half_move;
+	board_fen += " " + this.full_move;
+
 	return board_fen;
     }
 
@@ -142,7 +197,6 @@ class Board {
 	
 	var str: String = ""
 	for (var i: number = 0; i < 8; ++i){
-	    // feast your eyes on this beautiful one liner
 	    str += this.board.slice(i*8, (i+1) * 8).map(String).join(' ');
 	    str += "\n"
 	}
@@ -219,10 +273,18 @@ function drawBoard(board: Board) {
 
 }
 
-const starting_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-const board = new Board(starting_fen);
-console.log('' + board);
-console.log(board.fen())
-console.assert(board.fen() === starting_fen);
 
-drawBoard(board);
+function assertFen(fen: string) {
+    const test_board = new Board(fen);
+    console.log("Testing fen");
+    console.log(fen);
+    console.log(test_board.fen());
+    drawBoard(test_board);
+}
+
+const test_fen = "4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk - 0 1"
+const starting_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+//assertFen(test_fen);
+assertFen(starting_fen);
+//const board = new Board(test_fen);
+
