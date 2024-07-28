@@ -1,9 +1,9 @@
-const PieceTypes = ['K' , 'Q' , 'R' , 'B' , 'N' , 'P' , 'k' , 'q' , 'r' , 'b' , 'n' , 'p'] as const;
+const PieceTypes = ['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'] as const;
 const Sides = ['w', 'b'] as const;
 type PieceType = typeof PieceTypes[number];
 type Side = typeof Sides[number];
 
-function isPiece(c: string){
+function isPiece(c: string) {
     return PieceTypes.indexOf(c as PieceType) != -1;
 }
 
@@ -15,7 +15,7 @@ class Piece {
     has_moved: boolean;
     constructor(type: PieceType, has_moved: boolean) {
 	this.type = type;
-	this.side = this.getPieceColor(type); 
+	this.side = this.getPieceColor(type);
 	this.has_moved = has_moved;
     }
 
@@ -23,8 +23,8 @@ class Piece {
 	return `${this.type}`;
     }
 
-    getPieceColor(piece: PieceType): Side{
-	if (piece.toLowerCase() == piece){
+    getPieceColor(piece: PieceType): Side {
+	if (piece.toLowerCase() == piece) {
 	    return 'b';
 	}
 	return 'w';
@@ -64,7 +64,7 @@ class Board {
 	this.initializeFromFen(fen);
     }
 
-    initializeFromFen(fen: string){
+    initializeFromFen(fen: string) {
 	this.board.fill(' ');
 
 	const fen_components: string[] = fen.split(" ");
@@ -75,7 +75,7 @@ class Board {
 	const fen_halfmove: string = fen_components[4];
 	const fen_fullmove: string = fen_components[5];
 	var i: number = 0;
-	for (const c of fen_board){
+	for (const c of fen_board) {
 	    if (isPiece(c)) {
 		const current_piece = new Piece(c as PieceType, false);
 		this.board[i] = current_piece;
@@ -117,8 +117,8 @@ class Board {
 
     }
 
-    static squareToInt(square: string): number{
-	const row_number: number = 7 - (square.charCodeAt(0) - 'a'.charCodeAt(0)); 
+    static squareToInt(square: string): number {
+	const row_number: number = 7 - (square.charCodeAt(0) - 'a'.charCodeAt(0));
 	const column_number: number = (square.charCodeAt(1) - 1) - '0'.charCodeAt(0);
 	console.log("row number for", square, ":", row_number);
 	console.log("column number for", square, ":", column_number);
@@ -126,7 +126,7 @@ class Board {
     }
 
     static intToSquare(square: number): string {
-	const row_letter: string= String.fromCharCode('a'.charCodeAt(0) + 7 - (square % 8))
+	const row_letter: string = String.fromCharCode('a'.charCodeAt(0) + 7 - (square % 8))
 	const column_number: number = Math.floor(square / 8) + 1;
 	console.log("row letter for", square, ":", row_letter)
 	console.log("column number for", square, ":", column_number)
@@ -136,7 +136,7 @@ class Board {
     fen(): string {
 	var board_fen: string = "";
 	var space_counter: number = 0;
-	for(var i: number = 0; i < 64; ++i){
+	for (var i: number = 0; i < 64; ++i) {
 	    var c: (Piece | ' ') = this.board[i];
 	    if (c instanceof Piece) {
 		if (space_counter > 0) {
@@ -144,12 +144,12 @@ class Board {
 		    space_counter = 0;
 		}
 		board_fen += c.toString();
-	    } else if (c == ' ') {
+	} else if (c == ' ') {
 		space_counter++
 	    } else {
 		throw new Error("board has non-piece non-space element");
 	    }
-	    if ((i+1) % 8 == 0 && i != 0){
+	    if ((i + 1) % 8 == 0 && i != 0) {
 		if (space_counter > 0) {
 		    board_fen += space_counter;
 		    space_counter = 0;
@@ -163,16 +163,16 @@ class Board {
 
 	var castling_word = "";
 	if (this.valid_castles[0]) {
-	    castling_word += "K"; 
+	    castling_word += "K";
 	}
 	if (this.valid_castles[1]) {
-	    castling_word += "Q"; 
+	    castling_word += "Q";
 	}
 	if (this.valid_castles[2]) {
-	    castling_word += "k"; 
+	    castling_word += "k";
 	}
 	if (this.valid_castles[3]) {
-	    castling_word += "q"; 
+	    castling_word += "q";
 	}
 	if (!(this.valid_castles[0] || this.valid_castles[1] || this.valid_castles[2] || this.valid_castles[3])) {
 	    if (castling_word !== "") {
@@ -194,21 +194,78 @@ class Board {
     }
 
     public toString() {
-	
+
 	var str: String = ""
-	for (var i: number = 0; i < 8; ++i){
-	    str += this.board.slice(i*8, (i+1) * 8).map(String).join(' ');
+	for (var i: number = 0; i < 8; ++i) {
+	    str += this.board.slice(i * 8, (i + 1) * 8).map(String).join(' ');
 	    str += "\n"
 	}
 	return `${str}`;
     }
 
-    getPieceAtSquare(square: number):Piece | ' '{
+    getPieceAtSquare(square: number): Piece | ' ' {
 	return this.board[square];
     }
 
 }
 
+
+function pickupPiece(e: MouseEvent) {
+
+    if (clicked_piece === null) {
+	return;
+    }
+
+
+    const piece_square = clicked_piece.parentNode;
+    if (piece_square == null) {
+	return;
+    }
+
+
+    piece_square.removeChild(clicked_piece);
+    document.body.appendChild(clicked_piece);
+    clicked_piece.style.position = 'absolute'
+    clicked_piece.style.width = "75px";
+    clicked_piece.style.height = "75px";
+    var x = '' + (e.pageX - clicked_piece.offsetWidth / 2) + 'px';
+    var y = '' + (e.pageY - clicked_piece.offsetHeight / 2) + 'px';
+    clicked_piece.style.left = x;
+    clicked_piece.style.top = y;
+}
+
+function placePiece(e: MouseEvent) {
+    if (clicked_piece == null){
+	throw new Error("placing piece while clicked_piece is null");
+    }
+    if (previous_square == null){
+	throw new Error("placing piece while previous square is null");
+    }
+
+    document.body.removeChild(clicked_piece);
+    const cursor_element = document.elementFromPoint(e.clientX, e.clientY);
+    if (cursor_element === null) {
+	return;
+    }
+
+    if (cursor_element.id == "square" && cursor_element.querySelector("img") == null){
+	console.log("adding to square");
+	console.log(cursor_element);
+	const cursor_square = cursor_element as HTMLElement;
+	cursor_square.appendChild(clicked_piece);
+	clicked_piece.style.position = 'relative';
+	clicked_piece.style.left = '0';
+	clicked_piece.style.top = '0';
+    clicked_piece.style.top = "3px";
+    } else {
+	previous_square.appendChild(clicked_piece);
+	clicked_piece.style.position = 'relative';
+	clicked_piece.style.left = '0';
+	clicked_piece.style.top = "3px";
+    }
+
+    clicked_piece = null;
+}
 
 
 function drawBoard(board: Board) {
@@ -219,7 +276,7 @@ function drawBoard(board: Board) {
 	return;
     }
 
-    for (let i=0; i < 64; ++i){
+    for (let i = 0; i < 64; ++i) {
 	const square = document.createElement("div");
 	square.id = "square";
 
@@ -242,21 +299,35 @@ function drawBoard(board: Board) {
 
 	square.classList.add(...square_class_list);
 	if (i == 0) {
-	    square.style.borderRadius = "10px 0px 0px 0px";    
+	    square.style.borderRadius = "10px 0px 0px 0px";
 	} else if (i == 7) {
-	    square.style.borderRadius = "0px 10px 0px 0px";    
+	    square.style.borderRadius = "0px 10px 0px 0px";
 	} else if (i == 56) {
-	    square.style.borderRadius = "0px 0px 0px 10px";    
+	    square.style.borderRadius = "0px 0px 0px 10px";
 	} else if (i == 63) {
-	    square.style.borderRadius = "0px 0px 10px 0px";    
+	    square.style.borderRadius = "0px 0px 10px 0px";
 	}
 
 	const piece_at_square: Piece | ' ' = board.getPieceAtSquare(i);
-	if (piece_at_square != ' '){
+	if (piece_at_square != ' ') {
+	    const piece_div = document.createElement("div");
+	    piece_div.onclick = function(e) {
+		const piece_img = this as HTMLElement;
+		if (clicked_piece === null) {
+		    clicked_piece = piece_img;
+		    previous_square = piece_img.parentElement;
+		    pickupPiece(e);
+		} else {
+		    placePiece(e);
+		}
+	    }
 	    const type: string = piece_at_square.getImgPath();
-	    const piece_div = document.createElement("img");
-	    piece_div.src = type;
-	    piece_div.setAttribute('draggable', 'false');
+	    console.log("type:", type);
+	    piece_div.id = "piece";
+	    piece_div.className = "piece";
+	    piece_div.style.backgroundImage = "url(" + type + ")"
+	    //piece_div.setAttribute('draggable', 'false');
+	    piece_div.setAttribute('data-clicked', 'false');
 	    square.appendChild(piece_div);
 	}
 
@@ -282,6 +353,17 @@ function assertFen(fen: string) {
     drawBoard(test_board);
 }
 
+document.addEventListener("mousemove", (event) => {
+    if (clicked_piece != null) {
+	var x = '' + (event.pageX - clicked_piece.offsetWidth / 2) + 'px';
+	var y = '' + (event.pageY - clicked_piece.offsetHeight / 2) + 'px';
+	clicked_piece.style.left = x;
+	clicked_piece.style.top = y;
+    }
+})
+
+var clicked_piece: HTMLElement | null = null;
+var previous_square: HTMLElement | null = null;
 const test_fen = "4k2r/6r1/8/8/8/8/3R4/R3K3 w Qk - 0 1"
 const starting_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 //assertFen(test_fen);

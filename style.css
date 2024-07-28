@@ -11,35 +11,25 @@
 
 
 .square {
-    display: inline-flex;
-    width: 80px;
-    height: 80px;
-    align-items: center;
-    justify-content: center;
-    margin-left: 0px;
-    margin-right: 0px;
-    margin-bottom: -4px;
-    margin-top: 0px;
+    display: inline-block;
+    width: 80px !important;
+    height: 80px !important;
 }
 
 
-.square img {
-    width: 90%;
-    height: 90%;
-    margin: 0px 0px 0px 0px;
-    padding: 0px 0px 0px 0px;
+.piece {
+    position: relative;
+    width: 75px;
+    height: 75px;
+    top: 3px;
+    background-size: cover;
+
 }
 
-@media (max-width: 1000px) {
-    .square {
-        width: 8vw;
-        height: 8vw;
-    }
-
-    .square img {
-        margin-bottom: 3px;
-    }
+.piece, .square {
+    margin: -2px 0px -2px 0px;
 }
+
 
 .light {
     background-color: #aec6aa;
