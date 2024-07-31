@@ -1,3 +1,7 @@
+// TODO castling
+// TODO en passant
+// TODO pawn promotion
+
 export const PieceTypes = ['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'] as const;
 export const Sides = ['w', 'b'] as const;
 export type PieceType = typeof PieceTypes[number];

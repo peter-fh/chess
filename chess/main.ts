@@ -159,7 +159,7 @@ function processMove(square: HTMLElement){
 function drawBoard() {
 
     if (state.board_element == null) {
-	return;
+	throw new Error("Attempting to find board but board is null");
     }
 
     for (let i = 63; i >= 0; --i) {
@@ -218,7 +218,6 @@ function drawBoard() {
 	    piece_div.classList.add("piece");
 	    piece_div.classList.add(piece_at_square.toString());
 	    piece_div.style.backgroundImage = "url(" + type + ")"
-	    piece_div.setAttribute('data-clicked', 'false');
 	    square.appendChild(piece_div);
 	}
 
