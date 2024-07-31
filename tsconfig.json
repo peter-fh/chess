@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
       "lib": ["es2016", "dom"],
+    "module": "ESNext",
       "strict": true
   },
   "files": [
-    "main.ts"
+    "./chess/board.ts",
+    "./chess/main.ts",
   ]
 }
