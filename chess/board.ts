@@ -6,7 +6,7 @@ export const PieceTypes = ['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n'
 export const Sides = ['w', 'b'] as const;
 export type PieceType = typeof PieceTypes[number];
 export type Side = typeof Sides[number];
-export type MoveType = 'VALID_PASSIVE' | 'VALID_TAKE' | 'INVALID'
+export type MoveType = 'VALID_PASSIVE' | 'VALID_TAKE' | 'VALID_PROMOTION' | 'VALID_CASTLE' | 'INVALID'
 type MovePattern = 'SLIDING' | 'DIAGONAL' | 'L'
 
 export function isPiece(c: string) {
@@ -228,6 +228,12 @@ export class Board {
 	}
 	this.board[to] = this.board[from];
 	this.board[from] = ' ';
+
+	if (this.turn == 'b'){
+	    this.turn = 'w';
+	} else {
+	    this.turn = 'b';
+	}
     }
 
     static getMovePattern(from: number, to: number): MovePattern | null {
@@ -387,13 +393,11 @@ export class Board {
 	const move = new Move(from, to);
 	const type = piece.type;
 	const side = piece.side;
-
 	if (type.toLowerCase() == 'k'){
 	    if (this.isKingMove(move)){
 		return true;
 	    }
 	}
-
 	if (type.toLowerCase() == 'q'){
 	    if (this.isSlidingMove(move)){
 		return true;
@@ -402,19 +406,16 @@ export class Board {
 		return true;
 	    }
 	}
-
 	if (type.toLowerCase() == 'r'){
 	    if (this.isSlidingMove(move)){
 		return true;
 	    }
 	}
-
 	if (type.toLowerCase() == 'b'){
 	    if (this.isDiagonalMove(move)){
 		return true;
 	    }
 	}
-
 	if (type.toLowerCase() == 'n'){
 	    if (this.isKnightMove(move)){
 		return true;
@@ -428,12 +429,12 @@ export class Board {
 	}
 
 
-
-
 	return false;
     }
 
+
     moveType(piece: Piece, from: number, to: number) : MoveType {
+	var take = false;
 	if (to === from){
 	    return "INVALID";
 	} 
@@ -450,11 +451,9 @@ export class Board {
 	const to_piece = this.board[to];
 	if (to_piece != ' '){
 	    if (to_piece.getPieceColor() == piece.getPieceColor()){
-		return "INVALID";
+		take = true;
 	    }
-
-	    return "VALID_TAKE";
-	} 
+	}
 
 	return "VALID_PASSIVE";
     }

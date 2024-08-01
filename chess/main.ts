@@ -3,14 +3,12 @@ import {Board, Piece, Side, PieceType} from './board.js'
 
 class State {
     board: Board;
-    side: Side;
     board_element: HTMLElement;
     clicked_piece: HTMLElement | null;
     previous_square: HTMLElement | null;
     constructor(){
 
 	this.board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	this.side = 'w';
 
 	const board_element = document.getElementById("board");
 	if (board_element == null || board_element == undefined){
@@ -26,14 +24,6 @@ class State {
 	validateBoard();
     }
 
-    changeTurn(){
-	if (this.side == 'w'){
-	    this.side = 'b';
-	} else {
-	    this.side = 'w';
-	}
-
-    }
 }
 
 function pickupPiece(e: MouseEvent) {
@@ -94,17 +84,15 @@ function placePiece(e: MouseEvent){
 
     switch (move_type) {
 	case "VALID_TAKE":
-	    processTake(cursor_element as HTMLElement);
 	    state.board.makeMove(from, to);
-	    state.changeTurn()
+	    drawBoard();
 	    break;
 	case "VALID_PASSIVE":
-	    processMove(cursor_element as HTMLElement);
 	    state.board.makeMove(from, to);
-	    state.changeTurn()
+	    drawBoard();
 	    break;
 	case "INVALID":
-	    processMove(state.previous_square);
+	    drawBoard();
 	    break;
 	default:
 	    throw new Error("moveType() returned invalid value:" + move_type);
@@ -116,51 +104,15 @@ function placePiece(e: MouseEvent){
 }
 
 
-function processTake(square: HTMLElement) {
-    const removed_piece = square.firstChild;
-
-    if (removed_piece === null){
-	throw new Error("Trying to processTake() on a square without a piece on it");
-    }
-
-    if (state.clicked_piece === null){
-	throw new Error("Trying to processTake() when state.clicked_piece is null");
-    }
-
-    square.removeChild(removed_piece);
-    square.appendChild(state.clicked_piece);
-    state.clicked_piece.style.position = 'relative';
-    state.clicked_piece.style.left = '0';
-    state.clicked_piece.style.top = '0';
-    state.clicked_piece.style.top = "3px";
-    state.clicked_piece = null;
-    state.previous_square = null;
-
-}
-
-
-function processMove(square: HTMLElement){
-
-    if (state.clicked_piece === null){
-	throw new Error("Trying to processMove() when state.clicked_piece is null");
-    }
-
-    square.appendChild(state.clicked_piece);
-    state.clicked_piece.style.position = 'relative';
-    state.clicked_piece.style.left = '0';
-    state.clicked_piece.style.top = '0';
-    state.clicked_piece.style.top = "3px";
-    state.clicked_piece = null;
-    state.previous_square = null;
-
-}
-
-
 function drawBoard() {
 
     if (state.board_element == null) {
 	throw new Error("Attempting to find board but board is null");
     }
+
+    state.board_element.innerHTML = "";
+    state.clicked_piece = null;
+    state.previous_square = null;
 
     for (let i = 63; i >= 0; --i) {
 	const square = document.createElement("div");
@@ -202,7 +154,7 @@ function drawBoard() {
 	    piece_div.onclick = function(e) {
 		const piece_img = this as HTMLElement;
 		if (state.clicked_piece === null) {
-		    if (Piece.pieceColor(piece_img.classList[1] as PieceType) == state.side){
+		    if (Piece.pieceColor(piece_img.classList[1] as PieceType) == state.board.turn){
 			state.clicked_piece = piece_img;
 			state.previous_square = piece_img.parentElement;
 			pickupPiece(e);
@@ -269,4 +221,5 @@ document.addEventListener("mousemove", (event) => {
 
 
 const state = new State();
+console.log('hi');
 state.init();
