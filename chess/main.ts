@@ -80,27 +80,9 @@ function placePiece(e: MouseEvent){
     if (moved_piece == ' '){
 	throw new Error("Attempting to move piece that is null in board representation");
     }
-    const move_type = state.board.moveType(moved_piece, from, to);
 
-    switch (move_type) {
-	case "VALID_TAKE":
-	    state.board.makeMove(from, to);
-	    drawBoard();
-	    break;
-	case "VALID_PASSIVE":
-	    state.board.makeMove(from, to);
-	    drawBoard();
-	    break;
-	case "INVALID":
-	    drawBoard();
-	    break;
-	default:
-	    throw new Error("moveType() returned invalid value:" + move_type);
-
-    }
-
-    validateBoard();
-    
+    state.board.attemptMove(moved_piece, from, to);
+    drawBoard();
 }
 
 

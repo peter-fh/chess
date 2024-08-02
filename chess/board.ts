@@ -236,33 +236,6 @@ export class Board {
 	}
     }
 
-    static getMovePattern(from: number, to: number): MovePattern | null {
-	const x_from = from % 8;
-	const y_from = Math.floor(from / 8);
-	const x_to = to % 8;
-	const y_to = Math.floor(to / 8);
-	const dx = x_to - x_from;
-	const dy = y_to - y_from;
-	if (Math.abs(dx) == Math.abs(dy)){
-	    return 'DIAGONAL';
-	}
-
-	if (dx == 0 || dy == 0){
-	    return 'SLIDING';
-	}
-
-	if (Math.abs(dx) == 2 && Math.abs(dy) == 1){
-	    return 'L';
-	}
-
-	if (Math.abs(dx) == 1 && Math.abs(dy) == 2){
-	    return 'L';
-	}
-
-	return null;
-
-    }
-
     public getPieceAtSquare(x: number, y: number): Piece | ' ' {
 	return this.board[x+y*8];
     }
@@ -307,10 +280,7 @@ export class Board {
 	var x = move.x_from + x_iter;
 	var y = move.y_from + y_iter;
 	while (x != move.x_to || y != move.y_to){
-	    console.log("x:", x);
-	    console.log("y:", y);
 	    if (this.getPieceAtSquare(x, y) != ' '){
-		console.log(this.getPieceAtSquare(x, y));
 		return false;
 	    }
 	    x += x_iter;
@@ -390,6 +360,17 @@ export class Board {
     }
 
     isLegal(piece: Piece, from: number, to: number): boolean {
+	if (to === from) {
+	    return false;
+	}
+	const to_piece = this.board[to];
+
+	if (to_piece != ' '){
+	    if (to_piece.getPieceColor() == piece.getPieceColor()){
+		return false;
+	    }
+	}
+
 	const move = new Move(from, to);
 	const type = piece.type;
 	const side = piece.side;
@@ -420,7 +401,6 @@ export class Board {
 	    if (this.isKnightMove(move)){
 		return true;
 	    }
-	    console.log("invalid knight move");
 	}
 	if (type.toLowerCase() == 'p'){
 	    if (this.isPawnMove(move, side)){
@@ -433,31 +413,11 @@ export class Board {
     }
 
 
-    moveType(piece: Piece, from: number, to: number) : MoveType {
-	var take = false;
-	if (to === from){
-	    return "INVALID";
-	} 
-
-	const move_pattern = Board.getMovePattern(from, to);
-	if (move_pattern == null){
-	    return "INVALID";
+    attemptMove(piece: Piece, from: number, to: number) {
+	if (this.isLegal(piece, from, to)){
+	    this.makeMove(from, to);
 	}
-
-	if (!this.isLegal(piece, from, to)){
-	    return "INVALID"
-	}
-
-	const to_piece = this.board[to];
-	if (to_piece != ' '){
-	    if (to_piece.getPieceColor() == piece.getPieceColor()){
-		take = true;
-	    }
-	}
-
-	return "VALID_PASSIVE";
     }
-
     public toString() {
 
 	var str: String = ""
