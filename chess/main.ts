@@ -184,14 +184,6 @@ function validateBoard(){
     }
 }
 
-function assertFen(fen: string) {
-    const test_board = new Board(fen);
-    console.log("Testing fen");
-    console.log(fen);
-    console.log(test_board.fen());
-    drawBoard();
-}
-
 document.addEventListener("mousemove", (event) => {
     if (state.clicked_piece != null) {
 	var x = '' + (event.pageX - state.clicked_piece.offsetWidth / 2) + 'px';

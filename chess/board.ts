@@ -6,8 +6,6 @@ export const PieceTypes = ['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n'
 export const Sides = ['w', 'b'] as const;
 export type PieceType = typeof PieceTypes[number];
 export type Side = typeof Sides[number];
-export type MoveType = 'VALID_PASSIVE' | 'VALID_TAKE' | 'VALID_PROMOTION' | 'VALID_CASTLE' | 'INVALID'
-type MovePattern = 'SLIDING' | 'DIAGONAL' | 'L'
 
 export function isPiece(c: string) {
     return PieceTypes.indexOf(c as PieceType) != -1;
