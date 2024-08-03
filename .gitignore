@@ -33,3 +33,5 @@
 
 # Compiled javascript
 *.js
+
+/main
