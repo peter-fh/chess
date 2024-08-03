@@ -57,12 +57,15 @@ export class Piece {
 
 
 class Move {
-	x_from: number;
-	y_from: number;
-	x_to: number;
-	y_to: number;
-	dx: number;
-	dy: number;
+    x_from: number;
+    y_from: number;
+    x_to: number;
+    y_to: number;
+    dx: number;
+    dy: number;
+    is_legal: boolean;
+    is_castle: boolean;
+    is_en_passent: boolean;
     constructor(from: number, to: number){
 	this.x_from = from % 8;
 	this.y_from = Math.floor(from / 8);
@@ -70,6 +73,9 @@ class Move {
 	this.y_to = Math.floor(to / 8);
 	this.dx = this.x_to - this.x_from;
 	this.dy = this.y_to - this.y_from;
+	this.is_legal = false;
+	this.is_castle = false;
+	this.is_en_passent = false;
     }
 }
 
@@ -219,10 +225,17 @@ export class Board {
 	return board_fen;
     }
 
-    makeMove(from: number, to: number){
+    makeMove(move: Move){
+
+	const from = move.x_from + move.y_from * 8;
+	const to = move.x_to + move.y_to * 8;
 
 	if (this.board[from] == ' '){
 	    throw new Error("Making move when from square has no piece");
+	}
+
+	if (move.is_castle){
+	    return;
 	}
 	this.board[to] = this.board[from];
 	this.board[from] = ' ';
@@ -262,7 +275,7 @@ export class Board {
 	return true;
     }
 
-    isSlidingMove(move: Move): boolean{
+    isSlidingMove(move: Move): boolean {
 	if (!(move.dx == 0 || move.dy == 0)){
 	    return false;
 	}
@@ -357,63 +370,91 @@ export class Board {
 	return true;
     }
 
-    isLegal(piece: Piece, from: number, to: number): boolean {
+    isCastle(piece: Piece, from: number, to: number): boolean {
+	if (piece.type === 'K'){
+	    if (piece.has_moved){
+		return false;
+	    }
+	    if (to === 1 || to === 0){
+		const rook = this.board[0];
+		if (rook === ' '){
+		    return false;
+		}
+		if (rook.has_moved){
+		    return false;
+		}
+		return true;
+	    }
+	    if (to === 5 || to === 7){
+	    }
+	}
+    }
+
+    isLegal(piece: Piece, from: number, to: number): Move {
+	const move = new Move(from, to);
+	const type = piece.type;
+	const side = piece.side;
 	if (to === from) {
-	    return false;
+	    return move;
 	}
 	const to_piece = this.board[to];
 
 	if (to_piece != ' '){
 	    if (to_piece.getPieceColor() == piece.getPieceColor()){
-		return false;
+		return move;
 	    }
 	}
 
-	const move = new Move(from, to);
-	const type = piece.type;
-	const side = piece.side;
 	if (type.toLowerCase() == 'k'){
 	    if (this.isKingMove(move)){
-		return true;
+		move.is_legal = true;
+		return move;
 	    }
 	}
 	if (type.toLowerCase() == 'q'){
 	    if (this.isSlidingMove(move)){
-		return true;
+		move.is_legal = true;
+		return move;
 	    }
 	    if (this.isDiagonalMove(move)){
-		return true;
+		move.is_legal = true;
+		return move;
 	    }
 	}
 	if (type.toLowerCase() == 'r'){
 	    if (this.isSlidingMove(move)){
-		return true;
+		move.is_legal = true;
+		return move;
 	    }
 	}
 	if (type.toLowerCase() == 'b'){
 	    if (this.isDiagonalMove(move)){
-		return true;
+		move.is_legal = true;
+		return move;
 	    }
 	}
 	if (type.toLowerCase() == 'n'){
 	    if (this.isKnightMove(move)){
-		return true;
+		move.is_legal = true;
+		return move;
 	    }
 	}
 	if (type.toLowerCase() == 'p'){
 	    if (this.isPawnMove(move, side)){
-		return true;
+		move.is_legal = true;
+		return move;
 	    }
 	}
 
 
-	return false;
+	return move;
     }
 
 
     attemptMove(piece: Piece, from: number, to: number) {
-	if (this.isLegal(piece, from, to)){
-	    this.makeMove(from, to);
+	const move = this.isLegal(piece, from, to);
+	if (move.is_legal){
+	    this.makeMove(move);
 	}
     }
     public toString() {

@@ -195,5 +195,4 @@ document.addEventListener("mousemove", (event) => {
 
 
 const state = new State();
-console.log('hi');
 state.init();
