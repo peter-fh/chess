@@ -8,8 +8,8 @@ class State {
     previous_square: HTMLElement | null;
     constructor(){
 
-	this.board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-
+	//this.board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	this.board = new Board("r3k2r/pbppqppp/1pnbpn2/8/8/1PNBPN2/PBPPQPPP/R3K2R w KQkq - 0 1");
 	const board_element = document.getElementById("board");
 	if (board_element == null || board_element == undefined){
 	    throw new Error("Didn't find board div");
@@ -61,6 +61,7 @@ function placePiece(e: MouseEvent){
     document.body.removeChild(state.clicked_piece);
     var cursor_element = document.elementFromPoint(e.clientX, e.clientY);
     if (cursor_element === null) {
+	drawBoard();
 	return;
     }
 
@@ -72,7 +73,10 @@ function placePiece(e: MouseEvent){
 	cursor_element = parent_element;
     }
 
-
+    if (cursor_element.id != 'square'){
+	drawBoard();
+	return;
+    }
 
     const from = Number.parseInt(state.previous_square.classList[2]);
     const to = Number.parseInt(cursor_element.classList[2]);
@@ -82,6 +86,7 @@ function placePiece(e: MouseEvent){
     }
 
     state.board.attemptMove(moved_piece, from, to);
+    console.log(state.board.fen());
     drawBoard();
 }
 
@@ -140,8 +145,7 @@ function drawBoard() {
 			state.clicked_piece = piece_img;
 			state.previous_square = piece_img.parentElement;
 			pickupPiece(e);
-		    } else {
-		    }
+		    } 
 		} else {
 		    placePiece(e);
 		}
@@ -165,6 +169,10 @@ function drawBoard() {
 
 
     }
+
+    // Board currently tests that the fen created is the same output on init
+    // Creating a new board allows it to get a free test case every move
+    const _ = new Board(state.board.fen());
 
 }
 

@@ -115,14 +115,14 @@ export class Board {
 	const fen_en_passent: string = fen_components[3];
 	const fen_halfmove: string = fen_components[4];
 	const fen_fullmove: string = fen_components[5];
-	var i: number = 63;
+	var i: number = 0;
 	for (const c of fen_board) {
 	    if (isPiece(c)) {
 		const current_piece = new Piece(c as PieceType, false);
 		this.board[i] = current_piece;
-		i--;
+		i++;
 	    } else if (Number.isInteger(Number(c))) {
-		i -= parseInt(c);
+		i += parseInt(c);
 	    }
 	}
 
@@ -155,10 +155,8 @@ export class Board {
 	this.half_move = +fen_halfmove;
 	this.full_move = +fen_fullmove;
 	if (this.fen() != fen) {
-	    console.log("In fen:", fen);
-	    console.log("Out fen:", this.fen());
 	    throw new Error("input fen does not equal initialized board");
-	} 
+	}
 
 
     }
@@ -179,7 +177,7 @@ export class Board {
     fen(): string {
 	var board_fen: string = "";
 	var space_counter: number = 0;
-	for (var i: number = 63; i >= 0; --i) {
+	for (var i: number = 0; i < 64; ++i) {
 	    var c: (Piece | ' ') = this.board[i];
 	    if (c instanceof Piece) {
 		if (space_counter > 0) {
@@ -192,7 +190,7 @@ export class Board {
 	    } else {
 		throw new Error("board has non-piece non-space element");
 	    }
-	    if ((i) % 8 == 0 && i != 0) {
+	    if ((i + 1) % 8 == 0 && i != 0) {
 		if (space_counter > 0) {
 		    board_fen += space_counter;
 		    space_counter = 0;
@@ -236,66 +234,63 @@ export class Board {
 	return board_fen;
     }
 
-
     makeMove(move: Move){
+	console.log("making move")
 
 	const from = move.x_from + move.y_from * 8;
 	const to = move.x_to + move.y_to * 8;
 
 	if (this.board[from] == ' '){
-	    throw new Error("Making move when 'from' square has no piece");
+	    throw new Error("Making move when from square has no piece");
 	}
 
 	if (move.is_castle){
-	    var king_from: number;
-	    var king_to: number;
-	    var rook_from: number;
-	    var rook_to: number;
 	    if (move.piece.type == 'K'){
-		king_from = 3;
 		if (to < from) { // Kingside
-		    king_to = 1;
-		    rook_from = 0;
-		    rook_to = 2;
-		} else { // Queenside
-		    king_to = 5;
-		    rook_from = 7;
-		    rook_to = 4;
+		    if (this.board[3] == ' ' || this.board[0] == ' '){
+			throw new Error("White is trying to kingside castle in makeMove but king or rook is missing");
+		    }
+		    this.board[3].has_moved = true;
+		    this.board[0].has_moved = true;
+		    this.board[1] = this.board[3];
+		    this.board[3] = ' ';
+		    this.board[2] = this.board[0];
+		    this.board[0] = ' ';
+		} else {
+		    if (this.board[3] == ' ' || this.board[7] == ' ') {
+			throw new Error("White is trying to queenside castle in makeMove but king or rook is missing");
+		    }
+		    this.board[3].has_moved = true;
+		    this.board[7].has_moved = true;
+		    this.board[5] = this.board[3];
+		    this.board[3] = ' ';
+		    this.board[4] = this.board[7];
+		    this.board[7] = ' ';
 		}
 	    } else if (move.piece.type == 'k'){
-		king_from = 59;
 		if (to < from) { // Kingside
-		    king_to = 57;
-		    rook_from = 56;
-		    rook_to = 58;
-		} else { // Queenside
-		    king_to = 61;
-		    rook_from = 63;
-		    rook_to = 60;
+		    if (this.board[59] == ' ' || this.board[56] == ' '){
+			throw new Error("White is trying to kingside castle in makeMove but king or rook is missing");
+		    }
+		    this.board[59].has_moved = true;
+		    this.board[56].has_moved = true;
+		    this.board[57] = this.board[59];
+		    this.board[59] = ' ';
+		    this.board[58] = this.board[56];
+		    this.board[56] = ' ';
+		} else {
+		    if (this.board[59] == ' ' || this.board[63] == ' ') {
+			throw new Error("White is trying to queenside castle in makeMove but king or rook is missing");
+		    }
+		    this.board[59].has_moved = true;
+		    this.board[63].has_moved = true;
+		    this.board[61] = this.board[59];
+		    this.board[59] = ' ';
+		    this.board[60] = this.board[63];
+		    this.board[63] = ' ';
 		}
 	    } else {
 		throw new Error("trying to castle in makeMove but moved piece is not a king");
-	    }
-	    const king = this.board[king_from];
-	    const rook = this.board[rook_from];
-	    if (king == ' ' || rook == ' '){
-		throw new Error("Trying to castle but king or rook is not at its starting square");
-	    }
-	    king.has_moved = true;
-	    rook.has_moved = true;
-	    this.board[king_to] = this.board[king_from];
-	    this.board[king_from] = ' ';
-	    this.board[rook_to] = this.board[rook_from];
-	    this.board[rook_from] = ' ';
-	    const test_king = this.board[king_to];
-	    if (test_king == ' '){
-		throw new Error("Just placed king is somehow null");
-	    } else {
-		if (test_king.has_moved == false){
-		    throw new Error("King.has_moved is false but castle was just completed");
-		} else {
-		    console.log("all good from the castle!!!");
-		}
 	    }
 	} else {
 	    this.board[to] = this.board[from];
@@ -433,6 +428,7 @@ export class Board {
     }
 
     isCastle(move: Move): boolean{
+	console.log("testing castle")
 	if (move.piece.has_moved) {
 	    return false;
 	}
@@ -444,8 +440,10 @@ export class Board {
 		}
 		rook = this.board[0];
 	    } else if (move.to === 5 || move.to === 7) {
+		console.log("in correct castle check");
 		rook = this.board[7];
 		if (this.board[4] != ' ' || this.board[5] != ' ' || this.board[6] != ' '){
+		    console.log("pieces in the way");
 		    return false;
 		}
 	    } else {
@@ -453,12 +451,12 @@ export class Board {
 	    }
 	} else if (move.piece.type === 'k') {
 	    if (move.to === 57 || move.to === 56){
-		if (this.board[58] != ' ' || this.board[57] != ' '){
+		if (this.board[61] != ' ' || this.board[60] != ' '|| this.board[62] != ' '){
 		    return false;
 		}
 		rook = this.board[56];
 	    } else if (move.to === 61 || move.to === 63) {
-		if (this.board[61] != ' ' || this.board[60] != ' '|| this.board[62] != ' '){
+		if (this.board[58] != ' ' || this.board[57] != ' '){
 		    return false;
 		}
 		rook = this.board[63];
@@ -477,6 +475,7 @@ export class Board {
 	    return false;
 	}
 
+	console.log("valid castle");
 	return true;
     }
 

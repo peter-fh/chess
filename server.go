@@ -8,9 +8,10 @@ import (
 
 func main(){
 
-	fmt.Println("starting server")
+	port := ":5000"
 	http.Handle("/", http.FileServer(http.Dir("./chess")))
-	err := http.ListenAndServe(":8080", nil);
+	fmt.Printf("Started server at port=%s\n", port)
+	err := http.ListenAndServe(port, nil);
 	if err != nil{
 		panic(err)
 	}
