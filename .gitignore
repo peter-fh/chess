@@ -35,3 +35,6 @@
 *.js
 
 /main
+
+# CMake build directory
+build/
