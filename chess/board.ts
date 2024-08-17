@@ -1,6 +1,5 @@
-// TODO castling
-// TODO en passant
 // TODO pawn promotion
+// TODO castling through check
 
 export const PieceTypes = ['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'] as const;
 export const Sides = ['w', 'b'] as const;
@@ -69,6 +68,7 @@ class Move {
     is_legal: boolean;
     is_castle: boolean;
     is_en_passent: boolean;
+    is_double_pawn_move: boolean;
     constructor(piece: Piece, from: number, to: number){
 	this.piece = piece;
 	this.from = from;
@@ -82,6 +82,7 @@ class Move {
 	this.is_legal = false;
 	this.is_castle = false;
 	this.is_en_passent = false;
+	this.is_double_pawn_move = false;
     }
 }
 
@@ -241,6 +242,8 @@ export class Board {
 
 	const from = move.x_from + move.y_from * 8;
 	const to = move.x_to + move.y_to * 8;
+	const moved_piece: Piece | ' ' = this.board[from];
+
 
 	if (this.board[from] == ' '){
 	    throw new Error("Making move when 'from' square has no piece");
@@ -293,15 +296,34 @@ export class Board {
 	    } else {
 		if (test_king.has_moved == false){
 		    throw new Error("King.has_moved is false but castle was just completed");
-		} else {
-		    console.log("all good from the castle!!!");
 		}
 	    }
+	} else if (move.is_en_passent){
+	    var dead_pawn_index: number;
+	    if (this.turn == 'w'){
+		dead_pawn_index = move.to - 8;
+	    } else {
+		dead_pawn_index = move.to + 8;
+	    }
+		this.board[dead_pawn_index] = ' ';
+		this.board[to] = moved_piece;
+		this.board[from] = ' ';
 	} else {
 	    this.board[to] = this.board[from];
 	    this.board[from] = ' ';
 	}
 
+	if (move.is_double_pawn_move){
+	    var en_passent_square: number;
+	    if (this.turn == 'w'){
+		en_passent_square = move.to - 8;
+	    } else {
+		en_passent_square = move.to + 8;
+	    }
+	    this.en_passent = en_passent_square;
+	} else {
+	    this.en_passent = -1;
+	}
 	if (this.turn == 'b'){
 	    this.turn = 'w';
 	} else {
@@ -388,13 +410,19 @@ export class Board {
 	    if (move.dy == 2 && move.dx == 0){
 		if (move.y_from == 1 && this.getPieceAtSquare(move.x_from, move.y_from+1) == ' '){
 		    if (this.getPieceAtSquare(move.x_to, move.y_to) == ' '){
+			move.is_double_pawn_move = true;
 			return true;
 		    }
 		}
 	    }
 
-	    if (move.dy == 1 && Math.abs(move.dx) == 1 && this.getPieceAtSquare(move.x_to, move.y_to) != ' '){
-		return true;
+	    if (move.dy == 1 && Math.abs(move.dx) == 1){
+		if (this.getPieceAtSquare(move.x_to, move.y_to) != ' '){
+		    return true;
+		} else if (move.to == this.en_passent){
+		    move.is_en_passent = true;
+		    return true;
+		}
 	    }
 	}
 
@@ -408,13 +436,19 @@ export class Board {
 	    if (move.dy == -2 && move.dx == 0){
 		if (move.y_from == 6 && this.getPieceAtSquare(move.x_from, move.y_from-1) == ' '){
 		    if (this.getPieceAtSquare(move.x_to, move.y_to) == ' '){
+			move.is_double_pawn_move = true;
 			return true;
 		    }
 		}
 	    }
 
-	    if (move.dy == -1 && Math.abs(move.dx) == 1 && this.getPieceAtSquare(move.x_to, move.y_to) != ' '){
-		return true;
+	    if (move.dy == -1 && Math.abs(move.dx) == 1) {
+		if (this.getPieceAtSquare(move.x_to, move.y_to) != ' '){
+		    return true;
+		} else if (move.to == this.en_passent){
+		    move.is_en_passent = true;
+		    return true;
+		}
 	    }
 	}
 	return false;
@@ -549,11 +583,175 @@ export class Board {
 	return move;
     }
 
+    static inBounds(x: number, y: number): boolean {
+	if (x < 0 || x >= 8){
+	    return false;
+	}
+	if (y < 0 || y >= 8){
+	    return false;
+	}
+	return true;
+    }
+    castRay(from: number, dx: number, dy: number): (PieceType | null) {
+	var x: number = from % 8 + dx;
+	var y: number = Math.floor(from / 8) + dy;
+	while (Board.inBounds(x, y)){
+	    const square = this.board[y * 8 + x];
+	    if (square != ' '){
+		return square.type;
+	    }
+	    x += dx;
+	    y += dy;
+	}
+	return null;
+    }
+
+    testPiece(from: number, dx: number, dy: number, test_type: PieceType): boolean {
+	const to_x = from % 8 + dx;
+	const to_y = Math.floor(from / 8) + dy;
+	if (!Board.inBounds(to_x, to_y)){
+	    return false;
+	}
+	const to: number = from + dx + (dy * 8);
+	const square: Piece | ' ' = this.board[to];
+	if (square === ' '){
+	    return false;
+	}
+	if (test_type == square.type){
+	    return true;
+	}
+	return false;
+
+    }
+
+    convertToOpposite(piece: PieceType) : string{
+	if (this.turn == 'b'){
+	    return piece.toLowerCase();
+	}
+	return piece.toUpperCase();
+    }
+    // tests if next move from current state can be a king take
+    // for testing if a move is valid with this function, the move must be made first
+    inCheck(): boolean{
+	var king_position: number = -1;
+	const opposite_king: PieceType = (this.turn == 'w') ? 'k' : 'K';
+	for (var i=0; i < 64; i++){
+	    const square = this.board[i];
+	    if (square != ' '){
+		if (square.type == opposite_king){
+		    king_position = i;
+		    break;
+		}
+	    }
+	}
+	if (king_position == -1){
+	    throw new Error("Opposing king does not exist");
+	}
+
+	// - [x] king
+	// - [x] queen
+	// - [x] rook
+	// - [x] bishop
+	// - [x] knight
+	// - [x] pawn
+
+	const diagonal_pieces: (PieceType | null)[]= [];
+	diagonal_pieces.push(this.castRay(king_position, 1, 1));
+	diagonal_pieces.push(this.castRay(king_position, -1, 1));
+	diagonal_pieces.push(this.castRay(king_position, 1, -1));
+	diagonal_pieces.push(this.castRay(king_position, -1, -1));
+	for (const diagonal_piece of diagonal_pieces){
+	    if (diagonal_piece == this.convertToOpposite('q') || diagonal_piece == this.convertToOpposite('b')){
+		return true;
+	    }
+	}
+
+	const sliding_pieces: (PieceType | null)[] = [];
+	sliding_pieces.push(this.castRay(king_position, 1, 0));
+	sliding_pieces.push(this.castRay(king_position, -1, 0));
+	sliding_pieces.push(this.castRay(king_position, 0, 1));
+	sliding_pieces.push(this.castRay(king_position, 0, -1));
+
+	for (const sliding_piece of sliding_pieces){
+	    if (sliding_piece == this.convertToOpposite('q') || sliding_piece == this.convertToOpposite('r')){
+		return true;
+	    }
+	}
+
+	const knight_indices: number[][] = [
+	    [2, 1],
+	    [-2, 1],
+	    [2, -1],
+	    [-2, -1],
+	    [1, 2],
+	    [-1, 2],
+	    [1, -2],
+	    [-1, -2],
+	];
+
+	for (const knight_index of knight_indices){
+	    const dx = knight_index[0];
+	    const dy = knight_index[1];
+	    if (this.testPiece(king_position, dx, dy, this.convertToOpposite('n') as PieceType)){
+		return true;
+	    }
+	}
+
+	const king_indices: number[][] = [
+	    [1,1],
+	    [1,-1],
+	    [-1,1],
+	    [-1,-1],
+	    [0, 1],
+	    [0, -1],
+	    [1, 0],
+	    [-1, 0],
+	];
+
+	for (const king_index of king_indices){
+	    const dx = king_index[0];
+	    const dy = king_index[1];
+	    if (this.testPiece(king_position, dx, dy, this.convertToOpposite('k') as PieceType)){
+		return true;
+	    }
+	}
+
+	const forward_pawn_indices: number[][] = [
+	    [1, 1],
+	    [-1, 1],
+	];
+
+	const backward_pawn_indices: number[][] = [
+	    [1, -1],
+	    [-1, -1],
+	];
+
+	var pawn_indices: number[][];
+	if (this.turn == 'b'){
+	    pawn_indices = backward_pawn_indices;
+	} else if (this.turn == 'w'){
+	    pawn_indices = forward_pawn_indices;
+	}
+	for (const pawn_index of pawn_indices!){
+	    const dx = pawn_index[0];
+	    const dy = pawn_index[1];
+	    if (this.testPiece(king_position, dx, dy, this.convertToOpposite('p') as PieceType)){
+		return true;
+	    }
+	}
+
+	return false;
+    }
 
     attemptMove(piece: Piece, from: number, to: number) {
 	const move = this.isLegal(piece, from, to);
 	if (move.is_legal){
-	    this.makeMove(move);
+	    const next_board = new Board(this.fen());
+	    next_board.makeMove(move);
+	    if (!next_board.inCheck()){
+		this.makeMove(move);
+	    } else {
+	    }
 	}
     }
     public toString() {

@@ -8,8 +8,8 @@ class State {
     previous_square: HTMLElement | null;
     constructor(){
 
-	//this.board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	this.board = new Board("r3k2r/pbppqppp/1pnbpn2/8/8/1PNBPN2/PBPPQPPP/R3K2R w KQkq - 0 1");
+	this.board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	//this.board = new Board("r3k2r/pbppqppp/1pnbpn2/8/8/1PNBPN2/PBPPQPPP/R3K2R w KQkq - 0 1");
 	const board_element = document.getElementById("board");
 	if (board_element == null || board_element == undefined){
 	    throw new Error("Didn't find board div");
