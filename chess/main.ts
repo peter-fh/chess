@@ -6,10 +6,11 @@ class State {
     board_element: HTMLElement;
     clicked_piece: HTMLElement | null;
     previous_square: HTMLElement | null;
+    flipped: boolean;
     constructor(){
 
-	//this.board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	this.board = new Board("r3k2r/pbppqppp/1pnbpn2/8/8/1PNBPN2/PBPPQPPP/R3K2R w KQkq - 0 1");
+	this.board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	//this.board = new Board("r3k2r/pbppqppp/1pnbpn2/8/8/1PNBPN2/PBPPQPPP/R3K2R w KQkq - 0 1");
 	const board_element = document.getElementById("board");
 	if (board_element == null || board_element == undefined){
 	    throw new Error("Didn't find board div");
@@ -17,6 +18,8 @@ class State {
 	this.board_element = board_element;
 	this.clicked_piece = null;
 	this.previous_square = null;
+
+	this.flipped = Math.random() < 0.5;
     }
 
     init(){
@@ -91,6 +94,13 @@ function placePiece(e: MouseEvent){
 }
 
 
+function getBoardIndex(i: number): number {
+    if (state.flipped){
+	return 63 - i;
+    }
+    return i;
+}
+
 function drawBoard() {
 
     if (state.board_element == null) {
@@ -121,7 +131,7 @@ function drawBoard() {
 	    }
 	}
 
-	square_class_list.push("" + i);
+	square_class_list.push("" + getBoardIndex(i));
 
 
 	square.classList.add(...square_class_list);
@@ -135,7 +145,7 @@ function drawBoard() {
 	    square.style.borderRadius = "0px 0px 10px 0px";
 	}
 
-	const piece_at_square: Piece | ' ' = state.board.board[i]
+	const piece_at_square: Piece | ' ' = state.board.board[getBoardIndex(i)]
 	if (piece_at_square != ' ') {
 	    const piece_div = document.createElement("div");
 	    piece_div.onclick = function(e) {
@@ -179,13 +189,13 @@ function drawBoard() {
 
 function validateBoard(){
     for (var i=63; i >= 0; --i){
-	const square = document.getElementsByClassName(i.toString())[0] as HTMLElement;
+	const square = document.getElementsByClassName(getBoardIndex(i).toString())[0] as HTMLElement;
 	const piece = square.firstChild as HTMLElement;
-	if (piece == null && state.board.board[i] != ' '){
+	if (piece == null && state.board.board[getBoardIndex(i)] != ' '){
 	    throw new Error(`Board div at ${Board.intToSquare(i)} is empty but not in board class`);
 	} else if (piece != null){
 	    const piece_type = piece.classList[1];
-	    if (piece_type != state.board.board[i]){
+	    if (piece_type != state.board.board[getBoardIndex(i)]){
 		throw new Error(`Piece type at ${Board.intToSquare(i)} does not match (html: ${piece_type}, board: ${state.board.board[i]}`);
 	    };
 	}

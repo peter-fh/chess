@@ -8,8 +8,6 @@ export function isPiece(c: string) {
 }
 
 
-
-
 export class Piece {
     type: PieceType;
     side: Side;
