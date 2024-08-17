@@ -1,6 +1,3 @@
-// TODO pawn promotion
-// TODO castling through check
-
 export const PieceTypes = ['K', 'Q', 'R', 'B', 'N', 'P', 'k', 'q', 'r', 'b', 'n', 'p'] as const;
 export const Sides = ['w', 'b'] as const;
 export type PieceType = typeof PieceTypes[number];
@@ -69,6 +66,7 @@ class Move {
     is_castle: boolean;
     is_en_passent: boolean;
     is_double_pawn_move: boolean;
+    is_promotion: boolean;
     constructor(piece: Piece, from: number, to: number){
 	this.piece = piece;
 	this.from = from;
@@ -83,6 +81,7 @@ class Move {
 	this.is_castle = false;
 	this.is_en_passent = false;
 	this.is_double_pawn_move = false;
+	this.is_promotion = false;
     }
 }
 
@@ -324,6 +323,14 @@ export class Board {
 	} else {
 	    this.en_passent = -1;
 	}
+
+	if (move.is_promotion){
+	    if (this.turn == 'w'){
+		this.board[to] = new Piece('Q', true);
+	    } else {
+		this.board[to] = new Piece('q', true);
+	    }
+	}
 	if (this.turn == 'b'){
 	    this.turn = 'w';
 	} else {
@@ -400,9 +407,14 @@ export class Board {
     }
 
     isPawnMove(move: Move, side: Side): boolean {
+	if (move.y_to === 7 || move.y_to == 0) {
+	    move.is_promotion = true;
+	}
 	if (side == 'w'){
 	    if (move.dy == 1 && move.dx == 0){
 		if (this.getPieceAtSquare(move.x_to, move.y_to) == ' '){
+		    if (move.y_to == 7){
+		    }
 		    return true;
 		}
 	    }
@@ -467,6 +479,15 @@ export class Board {
     }
 
     isCastle(move: Move): boolean{
+	const king = this.board[move.from];
+	if (king == ' '){
+	    throw new Error("checking for castle when board at move.from is empty")
+	} else if (king.type.toLowerCase() != 'k'){
+	    throw new Error("checking for castle when board at move.from is not a king")
+	}
+
+	var castle_type = '';
+
 	if (move.piece.has_moved) {
 	    return false;
 	}
@@ -477,11 +498,13 @@ export class Board {
 		    return false;
 		}
 		rook = this.board[0];
+		castle_type = 'K'
 	    } else if (move.to === 5 || move.to === 7) {
 		rook = this.board[7];
 		if (this.board[4] != ' ' || this.board[5] != ' ' || this.board[6] != ' '){
 		    return false;
 		}
+		castle_type = 'Q'
 	    } else {
 		return false;
 	    }
@@ -491,11 +514,13 @@ export class Board {
 		    return false;
 		}
 		rook = this.board[56];
+		castle_type = 'k'
 	    } else if (move.to === 61 || move.to === 63) {
 		if (this.board[61] != ' ' || this.board[60] != ' '|| this.board[62] != ' '){
 		    return false;
 		}
 		rook = this.board[63];
+		castle_type = 'q'
 	    } else {
 		return false;
 	    }
@@ -508,6 +533,27 @@ export class Board {
 	}
 
 	if (rook.has_moved){
+	    return false;
+	}
+
+	var king_crossing_index: number;
+
+	if (castle_type == 'K'){
+	    king_crossing_index = 2;
+	} else if (castle_type == 'Q'){
+	    king_crossing_index = 4;
+	} else if (castle_type == 'k'){
+	    king_crossing_index = 58;
+	} else if (castle_type == 'q'){
+	    king_crossing_index = 60;
+	} else {
+	    throw new Error("Castle type is not set but castle is true");
+	}
+
+	const new_board = new Board(this.fen());
+	const king_move = new Move(king, move.from, king_crossing_index);
+	new_board.makeMove(king_move);
+	if (new_board.inCheck()){
 	    return false;
 	}
 
