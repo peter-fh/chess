@@ -7,12 +7,16 @@ project (
 	LANGUAGES CXX
 )
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 file(GLOB LIB_SOURCES "lib/*.cpp")
 
-add_executable(Engine src/driver.cpp ${LIB_SOURCES})
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_executable(Engine src/driver.cpp)
+add_executable(Test test/main_test.cpp ${LIB_SOURCES})
+
 
 include_directories(
 	"./include"
