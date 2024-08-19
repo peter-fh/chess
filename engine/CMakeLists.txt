@@ -14,7 +14,7 @@ file(GLOB LIB_SOURCES "lib/*.cpp")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(Engine src/driver.cpp)
+add_executable(Engine src/driver.cpp ${LIB_SOURCES})
 add_executable(Test test/main_test.cpp ${LIB_SOURCES})
 
 

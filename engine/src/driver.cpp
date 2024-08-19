@@ -3,5 +3,6 @@
 
 
 int main(){
-	std::cout << "hello engine" << std::endl;
+	std::cout << Board::int_to_square(56);
+
 }
