@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-#define panic(msg) std::cout << msg << std::endl;exit(1);
+#define panic(msg) std::cout << "panic!\n" << msg << std::endl;exit(1);
 
-#define bitboard uint64_t
+typedef uint64_t bitboard;
 
 
 typedef struct {

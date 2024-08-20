@@ -11,11 +11,11 @@ void assert_fen(){
 	};
 
 	std::string out;
-	Board* board; 
+	Board board; 
 
 	for (std::string fen: fens){
-		board = new Board(fen);
-		out = board->fen();
+		board = Board(fen);
+		out = board.fen();
 		//std::cout << fen << "->" << out << "\n\n";
 		assert(out == fen);
 	}

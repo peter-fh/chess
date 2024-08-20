@@ -78,6 +78,9 @@ Board::Board(){
 }
 
 Board::Board(std::string fen){
+	for (int i=0; i < 12; i++){
+		pieces[i] = 0ULL;
+	}
 	this->init_from_fen(fen);
 }
 
@@ -250,3 +253,5 @@ std::ostream& operator<<(std::ostream& out, const Board& board){
 	}
 	return out;
 }
+
+
