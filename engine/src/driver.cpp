@@ -20,7 +20,8 @@ int test_hash(int n, int (hash_function)(int n, bitboard k)){
 
 	std::cout << "\n";
 	for (int i=0; i < n; ++i){
-		std::cout << "[" << i << "]: " << arr[i] << "\n";
+		std::cout << std::bitset<64>(arr[i]) << " [" << i << "]\n";
+		//std::cout << "[" << i << "]: " << std::bitset<64>(arr[i]) << "\n";
 	}
 	delete[] arr;
 	return collisions;
@@ -34,6 +35,6 @@ int modulo_hash(int n, bitboard k){
 int main(){
 	int n=67;
 	int collisions = test_hash(n, modulo_hash);
-	std::cout << "Modulo hash: " << collisions << "collisions.\n";
+	std::cout << "Modulo hash: " << collisions << " collisions.\n";
 	//panic("Driver has not been implemented");
 }
