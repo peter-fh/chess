@@ -2,6 +2,7 @@
 #include <iostream>
 
 class Prettyboard {
+public:
 	Prettyboard(bitboard b);
 	friend std::ostream& operator<<(std::ostream& out, const Prettyboard& b);
 private:

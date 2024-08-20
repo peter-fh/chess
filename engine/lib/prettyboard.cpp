@@ -6,16 +6,16 @@ Prettyboard::Prettyboard(bitboard b){
 
 
 std::ostream& operator<<(std::ostream& out, const Prettyboard& b){
-	for (int i=0; i < 64; ++i){
-		if (i % 8 == 0 && i != 0){
-			out << "\n";
-		}
+	for (int i=63; i >=0; --i){
 		if (b.b & (1ULL << i)){
 			out << "1";
 		} else {
 			out << "0";
 		}
+		//out << " ";
+		if (i % 8 == 0 && i != 0){
+			out << "\n";
+		}
 	}
-	out << "\n";
 	return out;
 }

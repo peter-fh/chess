@@ -1,6 +1,7 @@
 #include "rays.h"
 #include <iostream>
 #include <bitset>
+#include "prettyboard.h"
 
 
 Rays::Rays(){
@@ -22,44 +23,77 @@ void Rays::zero_rays(){
 	}
 }
 
-static const bitboard BOUNDS_MASK = 0xff818181818181ff;
+
+bool in_bounds(int x, int y){
+
+	if (x > 7 || x < 0){
+		return false;
+	} 
+	if (y > 7 || y < 0){
+		return false;
+	}
+
+	return true;
+}
+
+
 bitboard cast_ray(bitboard b, int direction){
 
 	int position = 0;
-	bitboard ray = b;
+	bitboard ray = 0ULL;
 	while (b >>= 1){
 		position++;
 	}
+	const int b_pos = position;
+	//std::cout << "position: " << position <<"\n";
 
 	int x = position % 8;
 	int y = position / 8;
-	if (x == 7 && direction % 8 == 1){
-		return ray;
+	int dx = 0;
+	if (direction == 7 || direction == -1 || direction == -9){
+		dx = -1;
+	} else if (direction == 9 || direction == 1 || direction == -7){
+		dx = 1;
+	} else {
+		//std::cout << "dx is zero, direction is " << direction << "\n";
 	}
-	if (x == 0 && direction % 8 == 7){
-		return ray;
-	}
-	if (y == 7 && direction / 8 == 1){
-		return ray;
-	}
-	if (y == 0 && direction / 8 == -1){
-		return ray;
+	int dy = 0;
+	if (direction > 1){
+		dy = 1;
+	} else if (direction < -1){
+		dy = -1;
 	}
 
-	do {
-		if (direction < 0){
-			ray |= ray >> abs(direction);
-		} else {
-			ray |= ray << direction;
+		int debug_direction = -1;
+		int debug_pos = 27;
+	while (in_bounds(x, y)){
+		if (direction == debug_direction && b_pos == debug_pos){
+			std::cout << "x for 2: " << x << ", y: " << y << "\n";
+			std::cout << "dx for 2: " << dx << ", dy: " << dy << "\n";
+			std::cout << "ray for 2:\n"  << Prettyboard(ray) << "\n";
 		}
-		std::cout << std::bitset<64>(ray) << ", direction: " << direction << "\n";
-	} while (!(ray & BOUNDS_MASK));
+		position = x + y*8;
+		//std::cout << "position2: " << position <<"\n";
+		if (direction > 0){
+			ray |= (1ULL << position);
+		} else {
+			ray |= (1ULL << position);
+		}
+		x += dx;
+		y += dy;
+	}
+
+	if (direction == debug_direction && b_pos == debug_pos){
+		std::cout << "2: " << Prettyboard(ray)<<  "\n";
+	}
 	return ray;
+
 }
 
 void Rays::generate_rays(){
 	for (int i=0; i < 64; ++i){
 		bitboard b = 1ULL << i;
+		//std::cout << "i: " << i << "\n";
 		_north[hash(b)] = cast_ray(b, 8);
 		_northeast[hash(b)] = cast_ray(b, 7);
 		_east[hash(b)] = cast_ray(b, -1);
