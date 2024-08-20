@@ -34,6 +34,6 @@ int modulo_hash(int n, bitboard k){
 int main(){
 	int n=67;
 	int collisions = test_hash(n, modulo_hash);
-	std::cout << "Modulo hash: " << collisions << "\n";
+	std::cout << "Modulo hash: " << collisions << "collisions.\n";
 	//panic("Driver has not been implemented");
 }
