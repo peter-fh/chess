@@ -31,10 +31,29 @@ int modulo_hash(int n, bitboard k){
 	return k % n;
 }
 
+int _msb(bitboard b){
+	int position = 0;
+	while (b >>= 1){
+		++position;
+	}
+	return position;
+}
+
+int _msb_only(bitboard b){
+	return b & -b;
+		
+}
 
 int main(){
-	int n=67;
-	int collisions = test_hash(n, modulo_hash);
-	std::cout << "Modulo hash: " << collisions << " collisions.\n";
+	//int n=67;
+	//int collisions = test_hash(n, modulo_hash);
+	//std::cout << "Modulo hash: " << collisions << " collisions.\n";
+	//std::cout << _msb(0b101010) << "\n";
+
+	bitboard _ = 0b0000000000000000;
+	bitboard b = 0b1101000101011010;
+
+	std::cout << std::bitset<16>(b) << "\n";
+	std::cout << std::bitset<16>(_msb_only(b)) << "\n";
 	//panic("Driver has not been implemented");
 }

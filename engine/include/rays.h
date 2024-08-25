@@ -9,15 +9,6 @@
 class Rays {
 public:
 	Rays();
-	bitboard north(bitboard b);
-	bitboard northeast(bitboard b);
-	bitboard east(bitboard b);
-	bitboard southeast(bitboard b);
-	bitboard south(bitboard b);
-	bitboard southwest(bitboard b);
-	bitboard west(bitboard b);
-	bitboard northwest(bitboard b);
-private:
 	bitboard _north[N];
 	bitboard _northeast[N];
 	bitboard _east[N];
@@ -31,4 +22,12 @@ private:
 	int hash(bitboard b);
 };
 
+bitboard north(Rays& rays, bitboard b);
+bitboard northeast(Rays& rays, bitboard b);
+bitboard east(Rays& rays, bitboard b);
+bitboard southeast(Rays& rays, bitboard b);
+bitboard south(Rays& rays, bitboard b);
+bitboard southwest(Rays& rays, bitboard b);
+bitboard west(Rays& rays, bitboard b);
+bitboard northwest(Rays& rays, bitboard b);
 #endif

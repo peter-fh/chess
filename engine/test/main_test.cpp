@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cassert>
 #include <map>
+#include <fstream>
+#include <sstream>
 #include "board.h"
 #include "rays.h"
 #include "prettyboard.h"
@@ -23,7 +25,7 @@ void test_fen(){
 		assert(out == fen);
 	}
 
-	std::cout << "assert_fen(): passed\n";
+	std::cout << "test_fen(): passed\n";
 }
 
 
@@ -34,10 +36,18 @@ void test_square(){
 		//std::cout << "i=" << i <<", square=" << square << ", position=" << position << "\n";
 		assert(position == i);
 	}
-	std::cout << "assert_square(): passed\n";
+	std::cout << "test_square(): passed\n";
 
 }
 
+
+void print_rays(){
+	Rays rays;
+	for (int i=0; i < 64; ++i){
+		std::cout << "-------------------------" << i << "\n";
+		std::cout << Prettyboard(west(rays, (1ULL << i))) << "\n";
+	}
+}
 
 void test_rays() {
 	Rays rays;
@@ -66,47 +76,95 @@ void test_rays() {
 
 	for (auto const& [key, val]: north_cases){
 		bitboard test_case = 1ULL << key;
-		bitboard ray = rays.north(test_case);
-		std::cout << "Square: " << key << "\n";
-		std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
-		std::cout << "Val:\n" << Prettyboard(val) << "\n";
+		bitboard ray = north(rays, test_case);
+		//std::cout << "Square: " << key << "\n";
+		//std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
+		//std::cout << "Val:\n" << Prettyboard(val) << "\n";
 		assert(ray == val);
 	}
 
 	for (auto const& [key, val]: northeast_cases){
 		bitboard test_case = 1ULL << key;
-		bitboard ray = rays.northeast(test_case);
-		std::cout << "Square: " << key << "\n";
-		std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
-		std::cout << "Val:\n" << Prettyboard(val) << "\n";
+		bitboard ray = northeast(rays, test_case);
+		//std::cout << "Square: " << key << "\n";
+		//std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
+		//std::cout << "Val:\n" << Prettyboard(val) << "\n";
 		assert(ray == val);
 	}
 	for (auto const& [key, val]: east_cases){
 		bitboard test_case = 1ULL << key;
-		bitboard ray = rays.east(test_case);
-		std::cout << "Square: " << key << "\n";
-		std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
-		std::cout << "Val:\n" << Prettyboard(val) << "\n";
+		bitboard ray = east(rays, test_case);
+		//std::cout << "Square: " << key << "\n";
+		//std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
+		//std::cout << "Val:\n" << Prettyboard(val) << "\n";
 		assert(ray == val);
 	}
 
 	for (auto const& [key, val]: southeast_cases){
 		bitboard test_case = 1ULL << key;
-		bitboard ray = rays.southeast(test_case);
-		std::cout << "Square: " << key << "\n";
-		std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
-		std::cout << "Val:\n" << Prettyboard(val) << "\n";
+		bitboard ray = southeast(rays, test_case);
+		//std::cout << "Square: " << key << "\n";
+		//std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
+		//std::cout << "Val:\n" << Prettyboard(val) << "\n";
 		assert(ray == val);
 	}
 
 	for (auto const& [key, val]: south_cases){
 		bitboard test_case = 1ULL << key;
-		bitboard ray = rays.south(test_case);
-		std::cout << "Square: " << key << "\n";
-		std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
-		std::cout << "Val:\n" << Prettyboard(val) << "\n";
+		bitboard ray = south(rays, test_case);
+		//std::cout << "Square: " << key << "\n";
+		//std::cout << "Ray:\n" << Prettyboard(ray) << "\n";
+		//std::cout << "Val:\n" << Prettyboard(val) << "\n";
 		assert(ray == val);
 	}
+	std::cout << "test_rays(): passed\n";
+
+}
+
+
+typedef struct MovesTestCase{
+	std::string fen;
+	std::string moves;
+} MovesTestCase;
+
+void test_get_moves(){
+	std::ifstream log_file("../log.txt");
+	std::vector<MovesTestCase> test_cases;
+	if (!log_file.is_open()){
+		panic("could not open log.txt\n");
+	}
+
+	std::string line;
+	while (getline(log_file, line)){
+		MovesTestCase test_case;
+		if (line.find(";") != std::string::npos){
+			test_case.fen = line.substr(0, line.find(";"));
+			test_case.moves = line.substr(line.find(";")+1, line.length());
+			test_cases.push_back(test_case);
+		}
+	}
+
+
+	log_file.close();
+	std::cout << "closed log file\n";
+
+	for (auto test_case: test_cases){
+		std::cout << "Constructing boards\n";
+		Board board(test_case.fen);
+		std::cout << "Getting moves...\n";
+		Moves* moves = board.get_moves();
+		std::stringstream sout;
+		std::cout << "Displaying moves...\n";
+		sout << *moves;
+		std::string calculated_moves= sout.str();
+		//std::cout << "\nFen: " << test_case.fen << "\n";
+		std::cout << "\nBoard:\n" << board;
+		std::cout << test_case.moves << "[Test case]\n";
+		std::cout << calculated_moves << "[Engine]\n";
+		//assert(calculated_moves.length() == test_case.moves.length());
+	}
+
+	assert(false);
 
 }
 
@@ -114,5 +172,8 @@ int main(){
 	test_square();
 	test_fen();
 	test_rays();
+	test_get_moves();
 	std::cout << "passed all tests\n";
 }
+
+

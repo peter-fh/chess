@@ -1,72 +1,8 @@
 #include "board.h"
+#include "board_types.h"
+#include "prettyboard.h"
 #include <bitset>
 #include <iostream>
-
-
-#define K_MINDEX 0
-#define Q_MINDEX 1
-#define R1_MINDEX 2
-#define R2_MINDEX 3
-#define B1_MINDEX 4
-#define B2_MINDEX 5
-#define N1_MINDEX 6
-#define N2_MINDEX 7
-#define P1_MINDEX 8
-#define P2_MINDEX 9
-
-
-#define K_INDEX 0
-#define Q_INDEX 1
-#define R_INDEX 2
-#define B_INDEX 3
-#define N_INDEX 4
-#define P_INDEX 5
-#define k_INDEX 6
-#define q_INDEX 7
-#define r_INDEX 8
-#define b_INDEX 9
-#define n_INDEX 10
-#define p_INDEX 11
-
-
-#define WHITE 0
-#define BLACK 1
-static char turn_characters[2] = {'w', 'b'};
-
-
-static std::unordered_map<int, char> piece_map = {
-	{K_INDEX, 'K'},
-	{Q_INDEX, 'Q'},
-	{R_INDEX, 'R'},
-	{B_INDEX, 'B'},
-	{N_INDEX, 'N'},
-	{P_INDEX, 'P'},
-	{k_INDEX, 'k'},
-	{q_INDEX, 'q'},
-	{r_INDEX, 'r'},
-	{b_INDEX, 'b'},
-	{n_INDEX, 'n'},
-	{p_INDEX, 'p'}
-};
-
-
-static std::unordered_map<char, int> index_map = {
-	{'K', K_INDEX},
-	{'Q', Q_INDEX},
-	{'R', R_INDEX},
-	{'B', B_INDEX},
-	{'N', N_INDEX},
-	{'P', P_INDEX},
-	{'k', k_INDEX},
-	{'q', q_INDEX},
-	{'r', r_INDEX},
-	{'b', b_INDEX},
-	{'n', n_INDEX},
-	{'p', p_INDEX}
-};
-
-
-static char castle_characters[4] = {'K', 'Q', 'k', 'q'};
 
 
 
@@ -75,6 +11,8 @@ Board::Board(){
 		pieces[i] = 0ULL;
 	}
 	this->init_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	//this->init_from_fen("rnbqkbnr/ppp1pppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	set_sided_bitboards();
 }
 
 Board::Board(std::string fen){
@@ -82,6 +20,7 @@ Board::Board(std::string fen){
 		pieces[i] = 0ULL;
 	}
 	this->init_from_fen(fen);
+	set_sided_bitboards();
 }
 
 std::string Board::int_to_square(int position){
@@ -119,8 +58,10 @@ void Board::init_from_fen(std::string fen){
 
 	if (turn == "w"){
 		this->state.turn = WHITE;
+		this->piece_index_adder = 0;
 	} else if (turn == "b"){
 		this->state.turn = BLACK;
+		this->piece_index_adder = 6;
 	} else {
 		panic("Board::init_from_fen with " + fen + " has turn string " + turn);
 	}
@@ -168,8 +109,11 @@ void Board::init_from_fen(std::string fen){
 	this->state.halfmove = std::stoi(halfmove);
 
 	std::string fullmove = "";
-	for (char c; (c=fen[i]) != ' '; ++i){
+	for (char c; (c=fen[i]) != 0; ++i){
 		fullmove += c;
+		if (i > fen.length()){
+			panic("Seeking past fen length!\n");
+		}
 	}
 	if (fullmove == ""){
 		panic("Board::init_from_fen(): Halfmove is empty on fen " + fen);
@@ -245,12 +189,71 @@ std::string Board::fen(){
 }
 
 
+void Board::set_sided_bitboards(){
+	friendly_pieces = 0ULL;
+	opposite_pieces = 0ULL;
+	if (state.turn == 0){
+		for (int i=0; i < 6; ++i){
+			friendly_pieces |= pieces[i];
+		}
+		for (int i=6; i < 12; ++i){
+			opposite_pieces |= pieces[i];
+		}
+	} else {
+		for (int i=0; i < 6; ++i){
+			opposite_pieces |= pieces[i];
+		}
+		for (int i=6; i < 12; ++i){
+			friendly_pieces |= pieces[i];
+		}
+
+	}
+	all_pieces = friendly_pieces | opposite_pieces;
+
+
+}
+std::ostream& operator<<(std::ostream& out, const Moves& moves){
+	std::string moves_string;
+	for (int i=moves.index; i < 10; ++i){
+		Move move = moves.moves[i];
+		bitboard move_board = move.to;
+		while (move_board){
+			int move_to = msb_index(move_board);
+			std::string move_word = "";
+			move_word += move_piece_map[i];
+			move_word += Board::int_to_square(move_to);
+			move_word += " ";
+			moves_string += move_word;
+			move_board ^= (1ULL << move_to);
+
+		}
+	}
+
+	out << moves_string;
+	return out;
+}
+
 
 std::ostream& operator<<(std::ostream& out, const Board& board){
-	for (int i=0; i < 12; ++i){
-		std::bitset<64> piece(board.pieces[i]);
-		std::cout << piece_map[i] << ": " << piece << "\n";
+	for (int i=63; i >= 0; --i){
+		bool found = false;
+		for (int j=0; j < 12; ++j){
+			if ((1ULL << i) & board.pieces[j]){
+				std::cout << piece_map[j];
+				found = true;
+			} 
+		}
+		if (!found){
+			std::cout << "0";
+		}
+		if (i % 8 == 0){
+			std::cout << "\n";
+		}
 	}
+	/*for (int i=0; i < 12; ++i){*/
+	/*	std::bitset<64> piece(board.pieces[i]);*/
+	/*	std::cout << piece_map[i] << ": " << Prettyboard(board.pieces[i])<< "\n";*/
+	/*}*/
 	return out;
 }
 

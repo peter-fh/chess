@@ -2,23 +2,24 @@
 #define CHESS_TYPES_H
 
 #include <stdint.h>
+#include <iostream>
 
 #define panic(msg) std::cout << "panic!\n" << msg << std::endl;exit(1);
 
 typedef uint64_t bitboard;
 
 
-typedef struct {
+typedef struct Move {
 	bitboard to;
 	bitboard from;
 	char type;
 } Move;
 
 
-
-typedef struct {
+typedef struct Moves {
 	Move moves[10];
 	uint8_t index;
+	
 } Moves;
 
 
@@ -30,5 +31,6 @@ typedef struct {
 	int fullmove;
 } GameState;
 
+std::ostream& operator<<(std::ostream& out, const Moves& moves);
 
 #endif

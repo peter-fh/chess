@@ -1,6 +1,5 @@
 #include "rays.h"
 #include <iostream>
-#include <bitset>
 #include "prettyboard.h"
 
 
@@ -45,7 +44,6 @@ bitboard cast_ray(bitboard b, int direction){
 		position++;
 	}
 	const int b_pos = position;
-	//std::cout << "position: " << position <<"\n";
 
 	int x = position % 8;
 	int y = position / 8;
@@ -55,7 +53,6 @@ bitboard cast_ray(bitboard b, int direction){
 	} else if (direction == 9 || direction == 1 || direction == -7){
 		dx = 1;
 	} else {
-		//std::cout << "dx is zero, direction is " << direction << "\n";
 	}
 	int dy = 0;
 	if (direction > 1){
@@ -65,7 +62,7 @@ bitboard cast_ray(bitboard b, int direction){
 	}
 
 		int debug_direction = -1;
-		int debug_pos = 27;
+		int debug_pos = -1;
 	while (in_bounds(x, y)){
 		if (direction == debug_direction && b_pos == debug_pos){
 			std::cout << "x for 2: " << x << ", y: " << y << "\n";
@@ -105,29 +102,30 @@ void Rays::generate_rays(){
 	}
 }
 
-bitboard Rays::north(bitboard b){
-	return _north[hash(b)];
+
+bitboard north(Rays& rays, bitboard b){
+	return rays._north[rays.hash(b)];
 }
-bitboard Rays::northeast(bitboard b){
-	return _northeast[hash(b)];
+bitboard northeast(Rays& rays, bitboard b){
+	return rays._northeast[rays.hash(b)];
 }
-bitboard Rays::east(bitboard b){
-	return _east[hash(b)];
+bitboard east(Rays& rays, bitboard b){
+	return rays._east[rays.hash(b)];
 }
-bitboard Rays::southeast(bitboard b){
-	return _southeast[hash(b)];
+bitboard southeast(Rays& rays, bitboard b){
+	return rays._southeast[rays.hash(b)];
 }
-bitboard Rays::south(bitboard b){
-	return _south[hash(b)];
+bitboard south(Rays& rays, bitboard b){
+	return rays._south[rays.hash(b)];
 }
-bitboard Rays::southwest(bitboard b){
-	return _southwest[hash(b)];
+bitboard southwest(Rays& rays, bitboard b){
+	return rays._southwest[rays.hash(b)];
 }
-bitboard Rays::west(bitboard b){
-	return _southwest[hash(b)];
+bitboard west(Rays& rays, bitboard b){
+	return rays._west[rays.hash(b)];
 }
-bitboard Rays::northwest(bitboard b){
-	return _northwest[hash(b)];
+bitboard northwest(Rays& rays, bitboard b){
+	return rays._northwest[rays.hash(b)];
 }
 
 inline int Rays::hash(bitboard b){
