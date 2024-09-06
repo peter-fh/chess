@@ -65,6 +65,8 @@ class Move {
     is_en_passent: boolean;
     is_double_pawn_move: boolean;
     is_promotion: boolean;
+    is_kingside_castle: boolean;
+    is_queenside_castle: boolean;
     constructor(piece: Piece, from: number, to: number){
 	this.piece = piece;
 	this.from = from;
@@ -77,6 +79,8 @@ class Move {
 	this.dy = this.y_to - this.y_from;
 	this.is_legal = false;
 	this.is_castle = false;
+	this.is_kingside_castle = false;
+	this.is_queenside_castle = false;
 	this.is_en_passent = false;
 	this.is_double_pawn_move = false;
 	this.is_promotion = false;
@@ -537,12 +541,20 @@ export class Board {
 	var king_crossing_index: number;
 
 	if (castle_type == 'K'){
+	    console.log("setting to kingside castle")
+	    move.is_kingside_castle = true;
 	    king_crossing_index = 2;
 	} else if (castle_type == 'Q'){
+	    move.is_queenside_castle = true;
 	    king_crossing_index = 4;
+	    console.log("setting to queenside castle")
 	} else if (castle_type == 'k'){
+	    console.log("setting to kingside castle")
+	    move.is_kingside_castle = true;
 	    king_crossing_index = 58;
 	} else if (castle_type == 'q'){
+	    console.log("setting to queenside castle")
+	    move.is_queenside_castle = true;
 	    king_crossing_index = 60;
 	} else {
 	    throw new Error("Castle type is not set but castle is true");
@@ -583,6 +595,7 @@ export class Board {
 		    return move;
 		}
 	    } else if (this.isCastle(move)){
+		console.log("checking is castle")
 		move.is_legal = true;
 		move.is_castle = true;
 		return move;
@@ -787,6 +800,15 @@ export class Board {
 	return false;
     }
 
+
+    isAllowedMove(piece: Piece, from: number, to: number): boolean {
+	const move = this.isLegal(piece, from, to);
+	if (move.is_legal){
+	    return true;
+	}
+	return false;
+    }
+
     attemptMove(piece: Piece, from: number, to: number) {
 	const move = this.isLegal(piece, from, to);
 	if (move.is_legal){
@@ -794,9 +816,63 @@ export class Board {
 	    next_board.makeMove(move);
 	    if (!next_board.inCheck()){
 		this.makeMove(move);
-	    } else {
+		return true;
+	    } 
+	}
+	return false;
+    }
+
+    isFriendly(piece: Piece): boolean{
+	if (piece.side == this.turn){
+	    return true;
+	}
+	return false;
+    }
+
+
+    getMoves(): string {
+	const moves: string[] = [];
+	var queenside_castle = false;
+	var kingside_castle = false;
+	for (var i=0; i<64; ++i){
+	    for (var j=0; j<64; ++j){
+		var from = this.board[i];
+		if (from != ' ' && this.isFriendly(from)){
+		    const move = this.isLegal(from, i, j);
+		    if (move.is_legal && !move.is_castle){
+			console.log("is not castle")
+			var move_code = "";
+			move_code += from.type;
+			move_code += Board.intToSquare(j);
+			moves.push(move_code);
+		    } else if (move.is_castle){
+			console.log("is castle")
+			if (move.is_kingside_castle){
+			    if (!kingside_castle){
+				console.log("kingside castle");
+				moves.push("o-o");
+				kingside_castle = true;
+			    }
+			} else if (move.is_queenside_castle){
+				console.log("queenside castle");
+			    if (!queenside_castle){
+				moves.push("o-o-o");
+				queenside_castle = true;
+			    }
+			} else {
+			    throw new Error("castle is true but is neither kingside nor queenside");
+			}
+		    }
+		}
 	    }
 	}
+	moves.sort();
+	var move_string = "";
+	for (var i=0; i < moves.length; ++i){
+	    move_string += moves[i].toLowerCase() + " ";
+	    
+	}
+	return move_string;
     }
     public toString() {
 

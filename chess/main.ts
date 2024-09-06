@@ -7,6 +7,7 @@ class State {
     clicked_piece: HTMLElement | null;
     previous_square: HTMLElement | null;
     flipped: boolean;
+    log_mode: boolean;
     constructor(){
 
 	this.board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
@@ -20,6 +21,7 @@ class State {
 	this.previous_square = null;
 
 	this.flipped = Math.random() < 0.5;
+	this.log_mode = true;
     }
 
     init(){
@@ -88,9 +90,25 @@ function placePiece(e: MouseEvent){
 	throw new Error("Attempting to move piece that is null in board representation");
     }
 
-    state.board.attemptMove(moved_piece, from, to);
-    console.log(state.board.fen());
+    if (state.board.attemptMove(moved_piece, from, to) && state.log_mode){
+	logBoard();
+    }
     drawBoard();
+}
+
+function logBoard(){
+    const current_fen: string = state.board.fen();
+    const current_moves: string = state.board.getMoves();
+    fetch("/log", {
+	method: "POST",
+	body: `${current_fen};${current_moves}`,
+	headers: {
+	    "Content-type": "text",
+	},
+    })
+	.catch((error) => {
+	    console.log(error)
+	})
 }
 
 

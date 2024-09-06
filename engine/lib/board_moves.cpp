@@ -43,7 +43,7 @@ bitboard Board::directional_move(bitboard piece, Rays& rays, bitboard significan
 	bitboard collision_mask = ray & all_pieces;
 	bitboard closest_collision = significant_func(collision_mask);
 	bitboard exclusion_mask = ray_func(rays, closest_collision);
-	return ray & ~exclusion_mask;
+	return (ray & ~exclusion_mask) | closest_collision;
 }
 
 
@@ -74,7 +74,8 @@ bitboard Board::get_northwest_moves(bitboard piece){
 
 
 bitboard Board::queen_moves(bitboard queen){
-	return get_north_moves(queen) 
+	bitboard queen_move_board = 
+	get_north_moves(queen) 
 	| get_northeast_moves(queen) 
 	| get_east_moves(queen)
 	| get_southeast_moves(queen)
@@ -82,20 +83,26 @@ bitboard Board::queen_moves(bitboard queen){
 	| get_southwest_moves(queen)
 	| get_west_moves(queen)
 	| get_northwest_moves(queen);
+
+	return queen_move_board &~ friendly_pieces;
 }
 
 bitboard Board::bishop_moves(bitboard bishop){
-	return get_northeast_moves(bishop) |
+	bitboard bishop_move_board = 
+	get_northeast_moves(bishop) |
 	get_southeast_moves(bishop) |
 	get_southwest_moves(bishop) |
 	get_northwest_moves(bishop);
+	return bishop_move_board &~ friendly_pieces;
 }
 
 bitboard Board::rook_moves(bitboard rook){
-	return get_north_moves(rook)
-	| get_east_moves(rook)
-	| get_south_moves(rook)
-	| get_west_moves(rook);
+	bitboard rook_move_board = 
+		get_north_moves(rook)
+		| get_east_moves(rook)
+		| get_south_moves(rook)
+		| get_west_moves(rook);
+	return rook_move_board &~ friendly_pieces;
 
 }
 
@@ -155,8 +162,21 @@ bitboard Board::knight_moves(bitboard knight){
 	moves |= (knight & (W1_MASK | N2_MASK)) << 17;
 	moves |= (knight & (E1_MASK | N2_MASK)) << 15;
 	moves |= (knight & (E2_MASK | N1_MASK)) << 6;
-	moves &= ~all_pieces;
+	moves &= ~friendly_pieces;
 	return moves;
+}
+
+bitboard Board::king_moves(bitboard king){
+	bitboard king_moves = 0ULL;
+	king_moves |= (king & N1_MASK) << 8;
+	king_moves |= (king & (N1_MASK & E1_MASK)) << 7;
+	king_moves |= (king & E1_MASK) >> 1;
+	king_moves |= (king & (S1_MASK & E1_MASK)) >> 9;
+	king_moves |= (king & S1_MASK) >> 8;
+	king_moves |= (king & (S1_MASK & W1_MASK)) >> 7;
+	king_moves |= (king & W1_MASK) << 1;
+	king_moves |= (king & (N1_MASK & W1_MASK)) << 9;
+	return king_moves &~ friendly_pieces;
 }
 
 
@@ -165,6 +185,10 @@ Moves* Board::get_moves(){
 	bitboard queen = pieces[Q_INDEX + piece_index_adder];
 	moves->moves[Q_MINDEX].to = queen_moves(queen);
 	moves->moves[Q_MINDEX].from = queen;
+
+	bitboard king = pieces[K_INDEX + piece_index_adder];
+	moves->moves[K_MINDEX].to = king_moves(king);
+	moves->moves[K_MINDEX].from = king;
 
 	bitboard rooks = pieces[R_INDEX + piece_index_adder];
 	if (rooks){

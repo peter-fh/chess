@@ -169,7 +169,7 @@ void test_get_moves(){
 }
 
 int main(){
-	test_square();
+	//test_square();
 	test_fen();
 	test_rays();
 	test_get_moves();

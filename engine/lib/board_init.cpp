@@ -213,7 +213,7 @@ void Board::set_sided_bitboards(){
 
 }
 std::ostream& operator<<(std::ostream& out, const Moves& moves){
-	std::string moves_string;
+	std::vector<std::string> moves_list;
 	for (int i=moves.index; i < 10; ++i){
 		Move move = moves.moves[i];
 		bitboard move_board = move.to;
@@ -223,10 +223,18 @@ std::ostream& operator<<(std::ostream& out, const Moves& moves){
 			move_word += move_piece_map[i];
 			move_word += Board::int_to_square(move_to);
 			move_word += " ";
-			moves_string += move_word;
+			moves_list.push_back(move_word);
 			move_board ^= (1ULL << move_to);
 
 		}
+	}
+	
+	std::sort(moves_list.begin(), moves_list.end());
+
+	std::string moves_string = "";
+	for (std::string& move: moves_list){
+		move[0] = tolower(move[0]);
+		moves_string += move;
 	}
 
 	out << moves_string;

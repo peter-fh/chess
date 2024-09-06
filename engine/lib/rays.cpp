@@ -2,6 +2,7 @@
 #include <iostream>
 #include "prettyboard.h"
 
+// NOTE bug that was not committed is commented somewhere here
 
 Rays::Rays(){
 	zero_rays();
@@ -115,6 +116,7 @@ bitboard east(Rays& rays, bitboard b){
 bitboard southeast(Rays& rays, bitboard b){
 	return rays._southeast[rays.hash(b)];
 }
+// one of these was wrong and caused a bug (eg south had rays._southwest or something)
 bitboard south(Rays& rays, bitboard b){
 	return rays._south[rays.hash(b)];
 }

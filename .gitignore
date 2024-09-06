@@ -38,3 +38,6 @@
 
 # CMake build directory
 build/
+
+# CLangD cache directory
+.cache/
