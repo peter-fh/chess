@@ -189,6 +189,19 @@ std::string Board::fen(){
 }
 
 
+void Board::change_turn(){
+	if (state.turn == WHITE){
+		state.turn = BLACK;
+		set_sided_bitboards();
+	} else if (state.turn == BLACK){
+		state.turn = WHITE;
+		set_sided_bitboards();
+	} else {
+		panic("Turn in board while changing turn is not white or black")
+	}
+}
+
+
 void Board::set_sided_bitboards(){
 	friendly_pieces = 0ULL;
 	opposite_pieces = 0ULL;
@@ -199,6 +212,7 @@ void Board::set_sided_bitboards(){
 		for (int i=6; i < 12; ++i){
 			opposite_pieces |= pieces[i];
 		}
+		piece_index_adder = 0;
 	} else {
 		for (int i=0; i < 6; ++i){
 			opposite_pieces |= pieces[i];
@@ -206,15 +220,46 @@ void Board::set_sided_bitboards(){
 		for (int i=6; i < 12; ++i){
 			friendly_pieces |= pieces[i];
 		}
+		piece_index_adder = 6;
 
 	}
 	all_pieces = friendly_pieces | opposite_pieces;
+	phantom_pawn = 0ULL;
+	if (state.en_passent_position != -1){
+		phantom_pawn = 1ULL << state.en_passent_position;
+	}
 
 
 }
+
+std::ostream& _operator(std::ostream& out, const Move& move){
+
+	int move_to = msb_index(move.to);
+	std::string move_word = "";
+	std::cout << "Move index: " << move.index << "\n";
+	move_word += piece_map[move.index];
+	move_word += Board::int_to_square(move_to);
+	move_word += " ";
+	out << move_word;
+	return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const Move& move){
+
+	int move_to = msb_index(move.to);
+	std::string move_word = "";
+	std::cout << "Move index: " << move.index << "\n";
+	move_word += piece_map[move.index];
+	move_word += Board::int_to_square(move_to);
+	move_word += " ";
+	out << move_word;
+	return out;
+
+}
+
 std::ostream& operator<<(std::ostream& out, const Moves& moves){
 	std::vector<std::string> moves_list;
-	for (int i=moves.index; i < 10; ++i){
+	for (int i=moves.index; i < 12; ++i){
 		Move move = moves.moves[i];
 		bitboard move_board = move.to;
 		while (move_board){
@@ -227,6 +272,38 @@ std::ostream& operator<<(std::ostream& out, const Moves& moves){
 			move_board ^= (1ULL << move_to);
 
 		}
+	}
+	if (moves.castles[K_CASTLE_INDEX]){
+		moves_list.push_back("oo ");
+	}
+	if (moves.castles[Q_CASTLE_INDEX]){
+		moves_list.push_back("ooo ");
+	}
+	
+	std::sort(moves_list.begin(), moves_list.end());
+
+	std::string moves_string = "";
+	for (std::string& move: moves_list){
+		move[0] = tolower(move[0]);
+		moves_string += move;
+	}
+
+	out << moves_string;
+	return out;
+}
+std::ostream& operator_(std::ostream& out, const Moves& moves){
+	std::vector<std::string> moves_list;
+	for (int i=moves.index; i < 12; ++i){
+		Move move = moves.moves[i];
+		bitboard move_board = move.to;
+		std::cout << "Board for " << move_piece_map[i] << ":\n";
+		std::cout << Prettyboard(move_board) << "\n";
+	}
+	if (moves.castles[K_CASTLE_INDEX]){
+		moves_list.push_back("o-o ");
+	}
+	if (moves.castles[Q_CASTLE_INDEX]){
+		moves_list.push_back("o-o-o ");
 	}
 	
 	std::sort(moves_list.begin(), moves_list.end());
@@ -263,6 +340,22 @@ std::ostream& operator<<(std::ostream& out, const Board& board){
 	/*	std::cout << piece_map[i] << ": " << Prettyboard(board.pieces[i])<< "\n";*/
 	/*}*/
 	return out;
+}
+
+
+bool Board::validate(){
+	for (int i=0; i < 64; ++i){
+		bool found = false;
+		for (int j=0; j < 12; ++j){
+			if ((pieces[j] & (1ULL << i)) != 0){
+				if (found){
+					return false;
+				}
+				found = true;
+			}
+		}
+	}
+	return true;
 }
 
 

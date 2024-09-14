@@ -198,7 +198,7 @@ function drawBoard() {
 
     }
 
-    // Board currently tests that the fen created is the same output on init
+    // Board currently tests that the fen created is the same as the fen() output after initiation
     // Creating a new board allows it to get a free test case every move
     const _ = new Board(state.board.fen());
 

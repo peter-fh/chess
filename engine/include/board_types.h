@@ -9,8 +9,14 @@
 #define B2_MINDEX 5
 #define N1_MINDEX 6
 #define N2_MINDEX 7
-#define P1_MINDEX 8
-#define P2_MINDEX 9
+// forward
+#define PF_MINDEX 10
+// double forward
+#define PDF_MINDEX 11
+// right take
+#define PRT_MINDEX 8
+// left take
+#define PLT_MINDEX 9
 
 static std::unordered_map<int, char> move_piece_map = {
 	{K_MINDEX, 'K'},
@@ -21,8 +27,10 @@ static std::unordered_map<int, char> move_piece_map = {
 	{B2_MINDEX, 'B'},
 	{N1_MINDEX, 'N'},
 	{N2_MINDEX, 'N'},
-	{P1_MINDEX, 'P'},
-	{P2_MINDEX, 'P'},
+	{PF_MINDEX, 'P'},
+	{PDF_MINDEX, 'P'},
+	{PRT_MINDEX, 'P'},
+	{PLT_MINDEX, 'P'},
 };
 
 
@@ -38,6 +46,10 @@ static std::unordered_map<int, char> move_piece_map = {
 #define b_INDEX 9
 #define n_INDEX 10
 #define p_INDEX 11
+// o-o (kingside castle)
+#define OO_INDEX 12
+// o-o-o (queenside castle)
+#define OOO_INDEX 13
 
 // 00000001
 // 11111110
@@ -47,15 +59,27 @@ static std::unordered_map<int, char> move_piece_map = {
 // 3F
 // 80
 // 00000001
-#define W1_MASK 0x7F7F7F7F7F7F7F7F
-#define W2_MASK 0x3F3F3F3F3F3F3F3F
-#define E1_MASK 0xFEFEFEFEFEFEFEFE
-#define E2_MASK 0xFCFCFCFCFCFCFCFC
-#define N1_MASK 0x00FFFFFFFFFFFFFF
-#define N2_MASK 0x0000FFFFFFFFFFFF
-#define S1_MASK 0xFFFFFFFFFFFFFF00
-#define S2_MASK 0xFFFFFFFFFFFF0000
+#define W1_MASK			0x7F7F7F7F7F7F7F7F
+#define W2_MASK			0x3F3F3F3F3F3F3F3F
+#define E1_MASK			0xFEFEFEFEFEFEFEFE
+#define E2_MASK			0xFCFCFCFCFCFCFCFC
+#define N1_MASK			0x00FFFFFFFFFFFFFF
+#define N2_MASK			0x0000FFFFFFFFFFFF
+#define S1_MASK			0xFFFFFFFFFFFFFF00
+#define S2_MASK			0xFFFFFFFFFFFF0000
 
+#define W_UNMOVED_PAWN_MASK	0x000000000000FF00
+#define B_UNMOVED_PAWN_MASK	0x00FF000000000000
+
+#define K_CASTLE_INDEX 0
+#define Q_CASTLE_INDEX 1
+#define k_CASTLE_INDEX 2
+#define q_CASTLE_INDEX 3
+
+#define K_CASTLE_MASK		0x0000000000000006
+#define Q_CASTLE_MASK		0x0000000000000070
+#define k_CASTLE_MASK		0x0600000000000000
+#define q_CASTLE_MASK		0x7000000000000000
 
 #define WHITE 0
 #define BLACK 1

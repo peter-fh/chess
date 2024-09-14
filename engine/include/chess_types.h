@@ -8,18 +8,22 @@
 
 typedef uint64_t bitboard;
 
+int get_piece_index(int move_index, int turn);
 
 typedef struct Move {
 	bitboard to;
 	bitboard from;
-	char type;
+	int index;
+	int take_index;
 } Move;
 
+std::ostream& operator<<(std::ostream& out, const Move& move);
 
+// Index is 0-11 for move from Move array, 12 or 13 for 0 and 1 indices of castle array
 typedef struct Moves {
-	Move moves[10];
-	uint8_t index;
-	
+	Move moves[12];
+	bool castles[2];
+	int index;
 } Moves;
 
 

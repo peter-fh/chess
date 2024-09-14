@@ -5,6 +5,12 @@
 #include "rays.h"
 
 
+struct PawnMoveBoard {
+	bitboard forward;
+	bitboard double_forward;
+	bitboard right_take;
+	bitboard left_take;
+};
 
 class Board {
 
@@ -13,14 +19,18 @@ public:
 	Board(std::string fen);
 
 	Moves* get_moves();
-	void make_next_move(Moves* moves);
+	Move* make_next_move(Moves* moves);
+	void unmake_move(Move* move);
 	std::string fen();
 
 	friend std::ostream& operator<<(std::ostream& out, const Board& board);
 
 	static std::string int_to_square(int position);
 	static int square_to_int(std::string square);
+
+	bool validate();
 private:
+	void change_turn();
 	void init_from_fen(std::string fen);
 	void set_sided_bitboards();
 	bitboard directional_move(bitboard piece, Rays& rays, bitboard significant_func(bitboard), bitboard ray_func(Rays&, bitboard));
@@ -32,12 +42,15 @@ private:
 	bitboard rook_moves(bitboard rook);
 	bitboard bishop_moves(bitboard bishop);
 	bitboard knight_moves(bitboard knight);
-	bitboard pawn_moves(bitboard pawn);
+	bitboard white_pawn_moves(bitboard pawn);
+	void white_pawn_moves(PawnMoveBoard& pawn_move_board, bitboard pawns);
+	void black_pawn_moves(PawnMoveBoard& pawn_move_board, bitboard pawns);
 
 	bitboard pieces[12];
 	bitboard friendly_pieces;
 	bitboard opposite_pieces;
 	bitboard all_pieces;
+	bitboard phantom_pawn;
 	int piece_index_adder;
 	GameState state;
 	Rays rays;

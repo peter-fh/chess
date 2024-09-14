@@ -146,34 +146,55 @@ void test_get_moves(){
 
 
 	log_file.close();
-	std::cout << "closed log file\n";
 
-	for (auto test_case: test_cases){
-		std::cout << "Constructing boards\n";
+	for (auto test_case: test_cases) {
 		Board board(test_case.fen);
-		std::cout << "Getting moves...\n";
 		Moves* moves = board.get_moves();
 		std::stringstream sout;
-		std::cout << "Displaying moves...\n";
 		sout << *moves;
-		std::string calculated_moves= sout.str();
-		//std::cout << "\nFen: " << test_case.fen << "\n";
-		std::cout << "\nBoard:\n" << board;
-		std::cout << test_case.moves << "[Test case]\n";
-		std::cout << calculated_moves << "[Engine]\n";
-		//assert(calculated_moves.length() == test_case.moves.length());
+		std::string calculated_moves = sout.str();
+		assert(test_case.moves == calculated_moves);
+	}
+	std::cout << "test_get_moves(): passed\n";
+}
+
+
+void dfs(Board& board, int depth){
+	if (depth == 0){
+		return;
 	}
 
-	assert(false);
+	Moves* moves = board.get_moves();
+	while (true){
+		Move* move = board.make_next_move(moves);
+		if (move->index == -1){
+			break;
+		}
+		std::cout << "Made move " << *move << ":\n" << board << "";
+		dfs(board, depth - 1);
+		board.unmake_move(move);
+		std::cout << "Unmade move\n" << board << "\n";
+		assert(board.validate());
+	}
+}
+
+// Rafe: the day I start wearing new shoes is the day I start wearing new shoes
+
+void test_make_moves(){
+	
+	Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	dfs(board, 4);
+	std::cout << "test_make_moves(): passed\n";
 
 }
 
+
 int main(){
-	//test_square();
+	test_square();
 	test_fen();
 	test_rays();
 	test_get_moves();
+	test_make_moves();
 	std::cout << "passed all tests\n";
 }
-
 

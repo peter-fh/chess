@@ -850,13 +850,13 @@ export class Board {
 			if (move.is_kingside_castle){
 			    if (!kingside_castle){
 				console.log("kingside castle");
-				moves.push("o-o");
+				moves.push("oo");
 				kingside_castle = true;
 			    }
 			} else if (move.is_queenside_castle){
 				console.log("queenside castle");
 			    if (!queenside_castle){
-				moves.push("o-o-o");
+				moves.push("ooo");
 				queenside_castle = true;
 			    }
 			} else {
