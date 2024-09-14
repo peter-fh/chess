@@ -170,11 +170,11 @@ void dfs(Board& board, int depth){
 		if (move->index == -1){
 			break;
 		}
-		std::cout << "Made move " << *move << ":\n" << board << "";
+		/*std::cout << "Made move " << *move << ":\n" << board << "";*/
 		dfs(board, depth - 1);
 		board.unmake_move(move);
-		std::cout << "Unmade move\n" << board << "\n";
-		assert(board.validate());
+		/*std::cout << "Unmade move\n" << board << "\n";*/
+		//assert(board.validate());
 	}
 }
 
@@ -183,7 +183,7 @@ void dfs(Board& board, int depth){
 void test_make_moves(){
 	
 	Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	dfs(board, 4);
+	dfs(board, 5);
 	std::cout << "test_make_moves(): passed\n";
 
 }

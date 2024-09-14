@@ -331,6 +331,7 @@ std::ostream& operator<<(std::ostream& out, const Board& board){
 		if (!found){
 			std::cout << "0";
 		}
+		std::cout << " ";
 		if (i % 8 == 0){
 			std::cout << "\n";
 		}

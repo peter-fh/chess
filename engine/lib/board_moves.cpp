@@ -217,7 +217,7 @@ void Board::black_pawn_moves(PawnMoveBoard& pawn_move_board, bitboard pawns){
 
 
 Moves* Board::get_moves(){
-	std::cout << "Piece index adder: " << piece_index_adder << "\n";
+	/*std::cout << "Piece index adder: " << piece_index_adder << "\n";*/
 	Moves* moves = new Moves();	
 	moves->index = 0;
 	bitboard queen = pieces[Q_INDEX + piece_index_adder];
@@ -452,19 +452,18 @@ bitboard get_pawn_from(bitboard to, int index, int turn){
 			default:
 				panic("Calling get_pawn_from with index that isn't a pawn move index") 
 		}
-
 	}
 }
 
 
 Move* Board::make_next_move(Moves* moves){
-
-	std::cout << "Turn while making move: " << state.turn << "\n";
+	set_sided_bitboards();
+	/*std::cout << "Turn while making move: " << state.turn << "\n";*/
 	Move* return_move = new Move;
 	while (moves->index < 12 && moves->moves[moves->index].to == 0){
 		moves->index++;
 	}
-	std::cout << "Moves index: " << moves->index << "\n";
+	/*std::cout << "Moves index: " << moves->index << "\n";*/
 
 	int index = moves->index;
 	if (index < 12){
@@ -478,9 +477,9 @@ Move* Board::make_next_move(Moves* moves){
 		} else {
 			from = get_pawn_from(to, index, state.turn);
 		}
-		std::cout << "Piece index: " << piece_index << "\n";
-		std::cout << "From: " << Board::int_to_square(msb_index(from)) << "\n";
-		std::cout << "To: " << Board::int_to_square(msb_index(to)) << "\n";
+		/*std::cout << "Piece index: " << piece_index << "\n";*/
+		/*std::cout << "From: " << Board::int_to_square(msb_index(from)) << "\n";*/
+		/*std::cout << "To: " << Board::int_to_square(msb_index(to)) << "\n";*/
 
 		pieces[piece_index] &= ~from;
 		pieces[piece_index] |= to;
@@ -528,7 +527,7 @@ Move* Board::make_next_move(Moves* moves){
 		moves->index++;
 		change_turn();
 	} else {
-		std::cout << "index: " << index << "\n";
+		/*std::cout << "index: " << index << "\n";*/
 		moves->index = -1;
 		return_move->to = 0ULL;
 		return_move->from = 0ULL;
@@ -540,6 +539,7 @@ Move* Board::make_next_move(Moves* moves){
 
 
 void Board::unmake_move(Move* move){
+	set_sided_bitboards();
 	if (hamming_weight(pieces[11]) > 8){
 		panic("Too many black pawns!")
 	}
@@ -548,7 +548,7 @@ void Board::unmake_move(Move* move){
 	}
 
 	change_turn();
-	std::cout << "Turn while unmaking move: " << state.turn << "\n";
+	/*std::cout << "Turn while unmaking move: " << state.turn << "\n";*/
 	if (move->index < 12){
 		int piece_index = get_piece_index(move->index, state.turn);
 		bitboard to = move->to;
@@ -556,7 +556,7 @@ void Board::unmake_move(Move* move){
 		pieces[piece_index] &= ~to;
 		pieces[piece_index] |= from;
 		if (move->take_index != -1){
-			std::cout << "Undoing taking move" << "\n";
+			/*std::cout << "Undoing taking move" << "\n";*/
 			int take_index = move->take_index;
 			pieces[take_index] |= to;
 		}
