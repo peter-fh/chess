@@ -69,11 +69,16 @@ private:
 
 	int msb_index(bitboard b);
 	bitboard msb(bitboard b);
-	bitboard fast_lsb(bitboard b);
 	bitboard lsb(bitboard b);
+	bitboard slow_msb(bitboard b);
+	bitboard slow_lsb(bitboard b);
 	int hamming_weight(bitboard b);
+	int slow_hamming_weight(bitboard b);
+
+	void init_weights();
+	void init_msbs();
 	uint16_t weights[65536];
-	uint16_t msb_positions[65536];
+	uint16_t msbs[65536];
 
 };
 

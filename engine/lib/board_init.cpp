@@ -13,6 +13,8 @@ Board::Board(){
 	this->init_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	//this->init_from_fen("rnbqkbnr/ppp1pppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	set_sided_bitboards();
+	init_msbs();
+	init_weights();
 }
 
 Board::Board(std::string fen){
@@ -21,6 +23,20 @@ Board::Board(std::string fen){
 	}
 	this->init_from_fen(fen);
 	set_sided_bitboards();
+	init_msbs();
+	init_weights();
+}
+
+void Board::init_weights(){
+	for (int i=0; i < 65536; ++i){
+		weights[i] = slow_hamming_weight(i);
+	}
+}
+
+void Board::init_msbs(){
+	for (int i=0; i < 65536; ++i){
+		msbs[i] = slow_msb(i);
+	}
 }
 
 std::string Board::int_to_square(int position){

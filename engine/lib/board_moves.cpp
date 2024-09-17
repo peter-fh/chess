@@ -15,7 +15,7 @@ bitboard Board::directional_move(bitboard piece, Rays& rays, int bit_func_type, 
 	bitboard closest_collision;
 	switch (bit_func_type){
 		case LSB_FUNC:
-			closest_collision = fast_lsb(collision_mask);
+			closest_collision = lsb(collision_mask);
 			break;
 		case MSB_FUNC:
 			closest_collision = msb(collision_mask);
@@ -29,33 +29,33 @@ bitboard Board::directional_move(bitboard piece, Rays& rays, int bit_func_type, 
 }
 
 
-bitboard Board::get_north_moves(bitboard piece){
+inline bitboard Board::get_north_moves(bitboard piece){
 	return directional_move(piece, rays, LSB_FUNC, north);
 }
-bitboard Board::get_northeast_moves(bitboard piece){
+inline bitboard Board::get_northeast_moves(bitboard piece){
 	return directional_move(piece, rays, LSB_FUNC, northeast);
 }
-bitboard Board::get_east_moves(bitboard piece){
+inline bitboard Board::get_east_moves(bitboard piece){
 	return directional_move(piece, rays, MSB_FUNC, east);
 }
-bitboard Board::get_southeast_moves(bitboard piece){
+inline bitboard Board::get_southeast_moves(bitboard piece){
 	return directional_move(piece, rays, MSB_FUNC, southeast);
 }
-bitboard Board::get_south_moves(bitboard piece){
+inline bitboard Board::get_south_moves(bitboard piece){
 	return directional_move(piece, rays, MSB_FUNC, south);
 }
-bitboard Board::get_southwest_moves(bitboard piece){
+inline bitboard Board::get_southwest_moves(bitboard piece){
 	return directional_move(piece, rays, MSB_FUNC, southwest);
 }
-bitboard Board::get_west_moves(bitboard piece){
+inline bitboard Board::get_west_moves(bitboard piece){
 	return directional_move(piece, rays, LSB_FUNC, west);
 }
-bitboard Board::get_northwest_moves(bitboard piece){
+inline bitboard Board::get_northwest_moves(bitboard piece){
 	return directional_move(piece, rays, LSB_FUNC, northwest);
 }
 
 
-bitboard Board::queen_moves(bitboard queen){
+inline bitboard Board::queen_moves(bitboard queen){
 	bitboard queen_move_board = 
 	get_north_moves(queen) 
 	| get_northeast_moves(queen) 
@@ -69,7 +69,7 @@ bitboard Board::queen_moves(bitboard queen){
 	return queen_move_board &~ friendly_pieces;
 }
 
-bitboard Board::bishop_moves(bitboard bishop){
+inline bitboard Board::bishop_moves(bitboard bishop){
 	bitboard bishop_move_board = 
 	get_northeast_moves(bishop) |
 	get_southeast_moves(bishop) |
@@ -78,7 +78,7 @@ bitboard Board::bishop_moves(bitboard bishop){
 	return bishop_move_board &~ friendly_pieces;
 }
 
-bitboard Board::rook_moves(bitboard rook){
+inline bitboard Board::rook_moves(bitboard rook){
 	bitboard rook_move_board = 
 		get_north_moves(rook)
 		| get_east_moves(rook)
@@ -127,7 +127,7 @@ bitboard Board::rook_moves(bitboard rook){
 
 
 
-bitboard Board::knight_moves(bitboard knight){
+inline bitboard Board::knight_moves(bitboard knight){
 	bitboard moves = 0ULL;
 	moves |= (knight & (E2_MASK & S1_MASK)) >> 10;
 	moves |= (knight & (E1_MASK & S2_MASK)) >> 17;
@@ -141,7 +141,7 @@ bitboard Board::knight_moves(bitboard knight){
 	return moves;
 }
 
-bitboard Board::king_moves(bitboard king){
+inline bitboard Board::king_moves(bitboard king){
 	bitboard king_moves = 0ULL;
 	king_moves |= (king & N1_MASK) << 8;
 	king_moves |= (king & (N1_MASK & E1_MASK)) << 7;
@@ -157,7 +157,7 @@ bitboard Board::king_moves(bitboard king){
 
 
 
-void Board::white_pawn_moves(PawnMoveBoard& pawn_move_board, bitboard pawns){
+inline void Board::white_pawn_moves(PawnMoveBoard& pawn_move_board, bitboard pawns){
 	pawn_move_board.forward = pawns << 8;
 	pawn_move_board.forward &= ~all_pieces;
 	pawn_move_board.double_forward = ((pawns & W_UNMOVED_PAWN_MASK) &~ (all_pieces >> 8)) << 16;
@@ -168,7 +168,7 @@ void Board::white_pawn_moves(PawnMoveBoard& pawn_move_board, bitboard pawns){
 	pawn_move_board.left_take &= opposite_pieces | phantom_pawn;
 }
 
-void Board::black_pawn_moves(PawnMoveBoard& pawn_move_board, bitboard pawns){
+inline void Board::black_pawn_moves(PawnMoveBoard& pawn_move_board, bitboard pawns){
 	pawn_move_board.forward = pawns >> 8;
 	pawn_move_board.forward &= ~all_pieces;
 	pawn_move_board.double_forward = ((pawns & B_UNMOVED_PAWN_MASK) &~ (all_pieces << 8)) >> 16;
@@ -195,7 +195,7 @@ Moves* Board::get_moves(){
 
 	bitboard rooks = pieces[R_INDEX + piece_index_adder];
 	if (rooks){
-		bitboard lrook = fast_lsb(rooks);
+		bitboard lrook = lsb(rooks);
 		bitboard mrook = rooks & ~lrook;
 		moves->moves[R1_MINDEX].from = lrook;
 		moves->moves[R1_MINDEX].to = rook_moves(lrook);
@@ -206,7 +206,7 @@ Moves* Board::get_moves(){
 	}
 	bitboard bishops = pieces[B_INDEX + piece_index_adder];
 	if (bishops){
-		bitboard lbishop = fast_lsb(bishops);
+		bitboard lbishop = lsb(bishops);
 		bitboard mbishop = bishops & ~lbishop;
 		moves->moves[B1_MINDEX].from = lbishop;
 		moves->moves[B1_MINDEX].to = bishop_moves(lbishop);
@@ -218,7 +218,7 @@ Moves* Board::get_moves(){
 	}
 	bitboard knights = pieces[N_INDEX + piece_index_adder];
 	if (knights){
-		bitboard lknight = fast_lsb(knights);
+		bitboard lknight = lsb(knights);
 		bitboard mknight = knights & ~lknight;
 		moves->moves[N1_MINDEX].from = lknight;
 		moves->moves[N1_MINDEX].to = knight_moves(lknight);
@@ -433,7 +433,7 @@ Move* Board::make_next_move(Moves* moves){
 	int index = moves->index;
 	if (index < 12){
 		int piece_index = get_piece_index(index, state.turn);
-		bitboard to = fast_lsb(moves->moves[index].to);
+		bitboard to = lsb(moves->moves[index].to);
 		moves->moves[index].to &= ~to;
 		bitboard from;
 
