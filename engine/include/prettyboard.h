@@ -1,5 +1,6 @@
 #include "chess_types.h"
 #include <iostream>
+#pragma once
 
 class Prettyboard {
 public:

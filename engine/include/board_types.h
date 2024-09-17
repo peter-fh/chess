@@ -1,5 +1,6 @@
 #include "board.h"
 
+#pragma once
 
 #define K_MINDEX 0
 #define Q_MINDEX 1

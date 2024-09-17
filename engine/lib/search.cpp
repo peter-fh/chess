@@ -1,6 +1,5 @@
 #include "search.h"
 
-const int search_depth = 4;
 
 int dfs(Board& board, int depth){
 	if (depth == 0){

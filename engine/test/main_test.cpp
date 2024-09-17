@@ -204,13 +204,18 @@ void test_engine_takes_king(){
 
 
 void time_for_dfs(int depth){
-	using namespace std::chrono;
-	auto start = high_resolution_clock::now();
-	Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	Move* move = engine_move(board, depth);
-	auto end = high_resolution_clock::now();
-	auto duration = duration_cast<milliseconds>(end - start);
-	std::cout << "Time for search at depth " << depth << ": " << duration.count() << "ms\n";
+	int iterations = 100;
+	int total = 0;
+	for (int i=0; i < iterations; ++i){
+		using namespace std::chrono;
+		auto start = high_resolution_clock::now();
+		Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		Move* move = engine_move(board, depth);
+		auto end = high_resolution_clock::now();
+		auto duration = duration_cast<milliseconds>(end - start);
+		total += duration.count();
+	}
+	std::cout << "Time for search at depth " << depth << ": " << total / iterations << "ms\n";
 }
 
 
