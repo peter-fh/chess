@@ -6,6 +6,7 @@
 #include "rays.h"
 #include "prettyboard.h"
 #include "search.h"
+#include <chrono>
 
 void test_fen(){
 	std::vector<std::string> fens = {
@@ -194,11 +195,22 @@ void test_engine_takes_king(){
 	//Board board("kbK5/pp6/1P6/8/8/8/8/R7 w - - 0 1");
 	//std::cout << board << "\n";
 	//std::cout << Prettyboard(board.pieces[6]) << "\n\n";
-	Move* move = engine_move(board);
+	Move* move = engine_move(board, 3);
 	//std::cout << Prettyboard(move->to) << "\n\n";
 	//std::cout << Prettyboard(board.pieces[6]) << "\n\n";
 	assert((move->to & board.pieces[0]) != 0 || (move->to & board.pieces[6]) != 0);
 	std::cout << "test_engine_takes_king(): passed\n";
+}
+
+
+void time_for_dfs(int depth){
+	using namespace std::chrono;
+	auto start = high_resolution_clock::now();
+	Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	Move* move = engine_move(board, depth);
+	auto end = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(end - start);
+	std::cout << "Time for search at depth " << depth << ": " << duration.count() << "ms\n";
 }
 
 
@@ -209,6 +221,7 @@ int main(){
 	test_get_moves();
 	test_make_moves();
 	test_engine_takes_king();
+	time_for_dfs(4);
 	std::cout << "passed all tests\n";
 }
 
