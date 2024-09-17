@@ -28,12 +28,15 @@ public:
 	static std::string int_to_square(int position);
 	static int square_to_int(std::string square);
 
+	int evaluate();
 	bool validate();
+
+	friend void test_engine_takes_king();
 private:
 	void change_turn();
 	void init_from_fen(std::string fen);
 	void set_sided_bitboards();
-	bitboard directional_move(bitboard piece, Rays& rays, bitboard significant_func(bitboard), bitboard ray_func(Rays&, bitboard));
+	bitboard directional_move(bitboard piece, Rays& rays, int bit_func_type, bitboard ray_func(Rays&, bitboard));
 	bitboard get_positive_move(bitboard piece, int direction);
 
 
@@ -64,8 +67,17 @@ private:
 	bitboard get_west_moves(bitboard piece);
 	bitboard get_northwest_moves(bitboard piece);
 
+	int msb_index(bitboard b);
+	bitboard msb(bitboard b);
+	bitboard fast_lsb(bitboard b);
+	bitboard lsb(bitboard b);
+	int hamming_weight(bitboard b);
+	uint16_t weights[65536];
+	uint16_t msb_positions[65536];
+
 };
 
 int msb_index(bitboard b);
+
 
 #endif

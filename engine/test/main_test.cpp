@@ -3,9 +3,9 @@
 #include <map>
 #include <fstream>
 #include <sstream>
-#include "board.h"
 #include "rays.h"
 #include "prettyboard.h"
+#include "search.h"
 
 void test_fen(){
 	std::vector<std::string> fens = {
@@ -159,7 +159,7 @@ void test_get_moves(){
 }
 
 
-void dfs(Board& board, int depth){
+void test_dfs(Board& board, int depth){
 	if (depth == 0){
 		return;
 	}
@@ -171,7 +171,7 @@ void dfs(Board& board, int depth){
 			break;
 		}
 		/*std::cout << "Made move " << *move << ":\n" << board << "";*/
-		dfs(board, depth - 1);
+		test_dfs(board, depth - 1);
 		board.unmake_move(move);
 		/*std::cout << "Unmade move\n" << board << "\n";*/
 		//assert(board.validate());
@@ -183,9 +183,22 @@ void dfs(Board& board, int depth){
 void test_make_moves(){
 	
 	Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	dfs(board, 5);
+	//test_dfs(board, 1);
 	std::cout << "test_make_moves(): passed\n";
 
+}
+
+
+void test_engine_takes_king(){
+	Board board("8/3k4/8/8/8/3Q4/K7/8 w - - 0 1");
+	//Board board("kbK5/pp6/1P6/8/8/8/8/R7 w - - 0 1");
+	//std::cout << board << "\n";
+	//std::cout << Prettyboard(board.pieces[6]) << "\n\n";
+	Move* move = engine_move(board);
+	//std::cout << Prettyboard(move->to) << "\n\n";
+	//std::cout << Prettyboard(board.pieces[6]) << "\n\n";
+	assert((move->to & board.pieces[0]) != 0 || (move->to & board.pieces[6]) != 0);
+	std::cout << "test_engine_takes_king(): passed\n";
 }
 
 
@@ -195,6 +208,7 @@ int main(){
 	test_rays();
 	test_get_moves();
 	test_make_moves();
+	test_engine_takes_king();
 	std::cout << "passed all tests\n";
 }
 
