@@ -1,6 +1,6 @@
 #include "search.h"
 
-const int search_depth = 3;
+const int search_depth = 4;
 
 int dfs(Board& board, int depth){
 	if (depth == 0){
@@ -23,7 +23,7 @@ int dfs(Board& board, int depth){
 }
 
 
-Move* dfs_root(Board& board){
+Move* dfs_root(Board& board, int depth){
 	int max_eval = -100000;
 	Move* max_move = new Move;
 	Moves* moves = board.get_moves();
@@ -33,7 +33,7 @@ Move* dfs_root(Board& board){
 			break;
 		}
 
-		int eval = -dfs(board, search_depth-1);
+		int eval = -dfs(board, depth-1);
 		if (eval > max_eval){
 			max_move = move;
 			max_eval = eval;
@@ -44,8 +44,8 @@ Move* dfs_root(Board& board){
 }
 
 
-Move* engine_move(Board& board){
-	return dfs_root(board);
+Move* engine_move(Board& board, int depth){
+	return dfs_root(board, depth);
 }
 
 

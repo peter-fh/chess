@@ -15,7 +15,7 @@ bitboard Board::directional_move(bitboard piece, Rays& rays, int bit_func_type, 
 	bitboard closest_collision;
 	switch (bit_func_type){
 		case LSB_FUNC:
-			closest_collision = fast_lsb(collision_mask);
+			closest_collision = lsb(collision_mask);
 			break;
 		case MSB_FUNC:
 			closest_collision = msb(collision_mask);
