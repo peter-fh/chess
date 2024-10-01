@@ -6,6 +6,22 @@
 
 #define panic(msg) std::cout << "panic!\n" << msg << std::endl;exit(1);
 
+
+enum class PieceType {
+	King = 0,
+	Queen,
+	Rook,
+	Bishop,
+	Knight,
+	Pawn,
+	king,
+	queen,
+	rook,
+	bishop,
+	knight,
+	pawn,
+};
+
 typedef uint64_t bitboard;
 
 int get_piece_index(int move_index, int turn);

@@ -74,7 +74,7 @@ int Board::hamming_weight(bitboard b){
 		}
 	}
       */
-	return 0;
+	//return 0;
 	count += weights[b & LEAST_16];
 	count += weights[(b & SECOND_LEAST_16) >> 16];
 	count += weights[(b & SECOND_MOST_16) >> 32];

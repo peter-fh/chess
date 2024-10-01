@@ -215,7 +215,7 @@ void time_for_dfs(int depth){
 		auto duration = duration_cast<milliseconds>(end - start);
 		total += duration.count();
 	}
-	std::cout << "Time for search at depth " << depth << ": " << total / iterations << "ms\n";
+	std::cout << "Time for search at depth " << depth << ": " << static_cast<float>(total) / iterations << "ms\n";
 }
 
 

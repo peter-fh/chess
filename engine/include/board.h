@@ -3,6 +3,7 @@
 #include <string>
 #include "chess_types.h"
 #include "rays.h"
+#include "pst_manager.h"
 
 
 struct PawnMoveBoard {
@@ -79,6 +80,7 @@ private:
 	void init_msbs();
 	uint16_t weights[65536];
 	uint16_t msbs[65536];
+	PstManager pst_manager;
 
 };
 
