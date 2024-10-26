@@ -209,14 +209,19 @@ void time_for_dfs(int depth){
 	int total = 0;
 	for (int i=0; i < iterations; ++i){
 		using namespace std::chrono;
-		Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		std::cout << "Start\n";
 		auto start = high_resolution_clock::now();
-		Move* _ = engine_move(board, depth);
+		Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 		auto end = high_resolution_clock::now();
-		std::cout << "End\n";
 		auto duration = duration_cast<milliseconds>(end - start);
 		auto count = duration.count();
+		std::cout << "Startup time: " << count << "ms\n";
+		std::cout << "Start\n";
+		start = high_resolution_clock::now();
+		Move* _ = engine_move(board, depth);
+		end = high_resolution_clock::now();
+		std::cout << "End\n";
+		duration = duration_cast<milliseconds>(end - start);
+		count = duration.count();
 		std::cout << "Count: " << count << "\n";
 		total += count;
 	}
