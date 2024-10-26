@@ -17,10 +17,9 @@ void test_fen(){
 	};
 
 	std::string out;
-	Board board; 
 
 	for (std::string fen: fens){
-		board = Board(fen);
+		Board board = Board(fen);
 		out = board.fen();
 		//std::cout << fen << "->" << out << "\n\n";
 		assert(out == fen);
@@ -28,7 +27,6 @@ void test_fen(){
 
 	std::cout << "test_fen(): passed\n";
 }
-
 
 void test_square(){
 	for(int i=0; i < 64; ++i){
@@ -184,20 +182,23 @@ void test_dfs(Board& board, int depth){
 void test_make_moves(){
 	
 	Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	//test_dfs(board, 1);
+	test_dfs(board, 1);
 	std::cout << "test_make_moves(): passed\n";
 
 }
 
 
-void test_engine_takes_king(){
+void test_engine_takes_king(bool debug=false){
 	Board board("8/3k4/8/8/8/3Q4/K7/8 w - - 0 1");
-	//Board board("kbK5/pp6/1P6/8/8/8/8/R7 w - - 0 1");
-	//std::cout << board << "\n";
-	//std::cout << Prettyboard(board.pieces[6]) << "\n\n";
+	if (debug){
+		std::cout << board << "\n";
+		std::cout << Prettyboard(board.pieces[6]) << "\n\n";
+	}
 	Move* move = engine_move(board, 3);
-	//std::cout << Prettyboard(move->to) << "\n\n";
-	//std::cout << Prettyboard(board.pieces[6]) << "\n\n";
+	if (debug){
+		std::cout << Prettyboard(move->to) << "\n\n";
+		std::cout << Prettyboard(board.pieces[6]) << "\n\n";
+	}
 	assert((move->to & board.pieces[0]) != 0 || (move->to & board.pieces[6]) != 0);
 	std::cout << "test_engine_takes_king(): passed\n";
 }
@@ -208,24 +209,30 @@ void time_for_dfs(int depth){
 	int total = 0;
 	for (int i=0; i < iterations; ++i){
 		using namespace std::chrono;
-		auto start = high_resolution_clock::now();
 		Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		Move* move = engine_move(board, depth);
+		std::cout << "Start\n";
+		auto start = high_resolution_clock::now();
+		Move* _ = engine_move(board, depth);
 		auto end = high_resolution_clock::now();
+		std::cout << "End\n";
 		auto duration = duration_cast<milliseconds>(end - start);
-		total += duration.count();
+		auto count = duration.count();
+		std::cout << "Count: " << count << "\n";
+		total += count;
 	}
 	std::cout << "Time for search at depth " << depth << ": " << static_cast<float>(total) / iterations << "ms\n";
 }
 
 
 int main(){
+	/*
 	test_square();
 	test_fen();
 	test_rays();
 	test_get_moves();
 	test_make_moves();
-	test_engine_takes_king();
+	test_engine_takes_king(true);
+	*/
 	time_for_dfs(4);
 	std::cout << "passed all tests\n";
 }

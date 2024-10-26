@@ -32,7 +32,7 @@ public:
 	int evaluate();
 	bool validate();
 
-	friend void test_engine_takes_king();
+	friend void test_engine_takes_king(bool debug);
 private:
 	void change_turn();
 	void init_from_fen(std::string fen);

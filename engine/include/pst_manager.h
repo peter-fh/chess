@@ -9,6 +9,8 @@ typedef struct FastPst {
 	int* upper;
 	int* lower;
 	int* least_significant;
+	FastPst();
+	~FastPst();
 } FastPst;
 
 
@@ -19,10 +21,11 @@ public:
 	int evaluate_piece(bitboard b, int pst_index);
 private:
 	void init_pst();
-	void copy_pst(int* pst, int copy_index);
-	int tables[12][64];
+	void init_fast_pst(int* pst, int copy_index);
+	int slow_evaluate_piece(bitboard b, int pst_index, int* pst);
 	int piece_evals[12];
 
-	//FastPst fast_pst[12];
+
+	FastPst fast_psts[12];
 };
 #endif

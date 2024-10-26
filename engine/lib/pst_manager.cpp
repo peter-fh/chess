@@ -1,4 +1,6 @@
 #include "pst_manager.h"
+#include "board_types.h"
+#include "prettyboard.h"
 
 
 int PST_K[64] {
@@ -127,20 +129,25 @@ PstManager::PstManager(){
   init_pst();
 }
 
-void PstManager::init_pst(){
-  copy_pst(PST_K, 0);
-  copy_pst(PST_Q, 1);
-  copy_pst(PST_R, 2);
-  copy_pst(PST_B, 3);
-  copy_pst(PST_N, 4);
-  copy_pst(PST_P, 5);
-  copy_pst(PST_k, 6);
-  copy_pst(PST_q, 7);
-  copy_pst(PST_r, 8);
-  copy_pst(PST_b, 9);
-  copy_pst(PST_n, 10);
-  copy_pst(PST_p, 11);
+FastPst::FastPst(){
+  most_significant = new int[1 << 16];
+  upper = new int[1 << 16];
+  lower = new int[1 << 16];
+  least_significant = new int[1 << 16];
+}
 
+FastPst::~FastPst(){
+  /*
+  delete most_significant;
+  delete upper;
+  delete lower;
+  delete least_significant;
+  */
+}
+
+
+
+void PstManager::init_pst(){
   piece_evals[0] = 20000;
   piece_evals[1] = 800;
   piece_evals[2] = 500;
@@ -154,13 +161,58 @@ void PstManager::init_pst(){
   piece_evals[10] = -300;
   piece_evals[11] = -100;
 
+  init_fast_pst(PST_K, 0);
+  init_fast_pst(PST_Q, 1);
+  init_fast_pst(PST_R, 2);
+  init_fast_pst(PST_B, 3);
+  init_fast_pst(PST_N, 4);
+  init_fast_pst(PST_P, 5);
+  init_fast_pst(PST_k, 6);
+  init_fast_pst(PST_q, 7);
+  init_fast_pst(PST_r, 8);
+  init_fast_pst(PST_b, 9);
+  init_fast_pst(PST_n, 10);
+  init_fast_pst(PST_p, 11);
+}
+
+bitboard pst_lsb_index(bitboard b){
+  for(int i=0; i < 64; ++i){
+    bitboard piece = 1ULL << i;
+    if (b & piece) {
+      return i;
+    }
+  }
+
+  return 0;
 }
 
 
-void PstManager::copy_pst(int* pst, int copy_index){
-  for(int i=0; i < 64; ++i){
-    tables[copy_index][i] = pst[i];
+int PstManager::slow_evaluate_piece(bitboard b, int pst_index, int* pst){
+  int eval = 0;
+  while (b){
+    bitboard piece = pst_lsb_index(b);
+    eval += piece_evals[pst_index];
+    eval += pst[piece];
+    b &= ~(1ULL << piece);
   }
+  return eval;
+
+}
+void PstManager::init_fast_pst(int* pst, int piece_index){
+
+  FastPst fast_pst = fast_psts[piece_index];
+
+  int* most_significant = fast_pst.most_significant;
+  int* upper = fast_pst.upper;
+  int* lower = fast_pst.lower;
+  int* least_significant = fast_pst.least_significant;
+  for(bitboard i=0; i < (1 << 16); ++i) {
+    most_significant[i] = slow_evaluate_piece(i << 48, piece_index, pst);
+    upper[i] = slow_evaluate_piece(i << 32, piece_index, pst);
+    lower[i] = slow_evaluate_piece(i << 16, piece_index, pst);
+    least_significant[i] = slow_evaluate_piece(i, piece_index, pst);
+  }
+
 }
 
 int PstManager::evaluate_piece(bitboard b, int pst_index){
@@ -168,13 +220,13 @@ int PstManager::evaluate_piece(bitboard b, int pst_index){
     return 0;
   }
 
+  FastPst fast_pst = fast_psts[pst_index];
+
   int total = 0;
-  for (int i=0; i < 64; ++i){
-    if ((1ULL << i) & b){
-      total += tables[pst_index][i];
-      total += piece_evals[pst_index];
-    }
-  }
+  total += fast_pst.most_significant[(b & MOST_16) >> 48];
+  total += fast_pst.upper[(b & SECOND_MOST_16) >> 32];
+  total += fast_pst.lower[(b & SECOND_LEAST_16) >> 16];
+  total += fast_pst.least_significant[b & LEAST_16];
   return total;
 }
 
