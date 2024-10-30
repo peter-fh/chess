@@ -6,6 +6,9 @@
 #include "pst_manager.h"
 
 
+namespace Test {
+	void test_engine_takes_king(bool debug);
+}
 struct PawnMoveBoard {
 	bitboard forward;
 	bitboard double_forward;
@@ -18,6 +21,8 @@ class Board {
 public:
 	Board();
 	Board(std::string fen);
+	Board(PstManager* pst_manager);
+	Board(std::string fen, PstManager* pst_manager);
 
 	Moves* get_moves();
 	Move* make_next_move(Moves* moves);
@@ -32,7 +37,7 @@ public:
 	int evaluate();
 	bool validate();
 
-	friend void test_engine_takes_king(bool debug);
+	friend void Test::test_engine_takes_king(bool debug);
 private:
 	void change_turn();
 	void init_from_fen(std::string fen);
@@ -80,7 +85,7 @@ private:
 	void init_msbs();
 	uint16_t weights[65536];
 	uint16_t msbs[65536];
-	PstManager pst_manager;
+	PstManager* pst_manager;
 
 };
 

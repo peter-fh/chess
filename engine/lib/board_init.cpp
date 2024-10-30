@@ -7,6 +7,7 @@
 
 
 Board::Board(){
+	pst_manager = new PstManager;
 	for (int i=0; i < 12; i++){
 		pieces[i] = 0ULL;
 	}
@@ -18,6 +19,29 @@ Board::Board(){
 }
 
 Board::Board(std::string fen){
+	pst_manager = new PstManager;
+	for (int i=0; i < 12; i++){
+		pieces[i] = 0ULL;
+	}
+	this->init_from_fen(fen);
+	set_sided_bitboards();
+	init_msbs();
+	init_weights();
+}
+Board::Board(PstManager* inp_pst_manager){
+	pst_manager = inp_pst_manager;
+	for (int i=0; i < 12; i++){
+		pieces[i] = 0ULL;
+	}
+	this->init_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	//this->init_from_fen("rnbqkbnr/ppp1pppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	set_sided_bitboards();
+	init_msbs();
+	init_weights();
+}
+
+Board::Board(std::string fen, PstManager* inp_pst_manager){
+	pst_manager = inp_pst_manager;
 	for (int i=0; i < 12; i++){
 		pieces[i] = 0ULL;
 	}

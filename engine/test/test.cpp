@@ -8,7 +8,10 @@
 #include "search.h"
 #include <chrono>
 
+namespace Test {
+
 void test_fen(){
+	PstManager* pst_manager = new PstManager;
 	std::vector<std::string> fens = {
 		"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
 		"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2",
@@ -19,7 +22,7 @@ void test_fen(){
 	std::string out;
 
 	for (std::string fen: fens){
-		Board board = Board(fen);
+		Board board = Board(fen, pst_manager);
 		out = board.fen();
 		//std::cout << fen << "->" << out << "\n\n";
 		assert(out == fen);
@@ -59,7 +62,7 @@ void test_rays() {
 		{2, 0x10204}
 	};
 	std::map<int, bitboard> east_cases = {
-		{27, 0xf000000},
+	{27, 0xf000000},
 		{0, 1}
 	};
 	std::map<int, bitboard> southeast_cases = {
@@ -127,6 +130,7 @@ typedef struct MovesTestCase{
 } MovesTestCase;
 
 void test_get_moves(){
+	PstManager* pst_manager = new PstManager;
 	std::ifstream log_file("../log.txt");
 	std::vector<MovesTestCase> test_cases;
 	if (!log_file.is_open()){
@@ -147,7 +151,7 @@ void test_get_moves(){
 	log_file.close();
 
 	for (auto test_case: test_cases) {
-		Board board(test_case.fen);
+		Board board(test_case.fen, pst_manager);
 		Moves* moves = board.get_moves();
 		std::stringstream sout;
 		sout << *moves;
@@ -180,7 +184,7 @@ void test_dfs(Board& board, int depth){
 // Rafe: the day I start wearing new shoes is the day I start wearing new shoes
 
 void test_make_moves(){
-	
+
 	Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	test_dfs(board, 1);
 	std::cout << "test_make_moves(): passed\n";
@@ -211,44 +215,4 @@ void test_read_psts(){
 }
 
 
-void time_for_dfs(int depth){
-	int iterations = 100;
-	std::cout << "Calculating search time at depth " << depth << " for " << iterations << " iterations\n";
-	int total_search_time = 0;
-	int total_startup_time = 0;
-	for (int i=0; i < iterations; ++i){
-		using namespace std::chrono;
-		auto start = high_resolution_clock::now();
-		Board board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		auto end = high_resolution_clock::now();
-		auto duration = duration_cast<milliseconds>(end - start);
-		auto count = duration.count();
-		total_startup_time += count;
-		start = high_resolution_clock::now();
-		Move* _ = engine_move(board, depth);
-		end = high_resolution_clock::now();
-		duration = duration_cast<milliseconds>(end - start);
-		count = duration.count();
-		total_search_time += count;
-		std::cout << "\rIteration " << i+1 << "/" << iterations << std::flush;
-	}
-	std::cout << "Time for startup: " << static_cast<float>(total_search_time) / iterations << "ms\n";
-	std::cout << "Time for search at depth " << depth << ": " << static_cast<float>(total_startup_time) / iterations << "ms\n";
 }
-
-
-
-int main(){
-	/*
-	test_square();
-	test_fen();
-	test_rays();
-	test_get_moves();
-	test_make_moves();
-	test_engine_takes_king(true);
-	*/
-	//test_read_psts();
-	time_for_dfs(4);
-	std::cout << "passed all tests\n";
-}
-
