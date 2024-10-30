@@ -7,6 +7,8 @@ project (
 	LANGUAGES CXX
 )
 
+file(MAKE_DIRECTORY "generated")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -16,6 +18,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(Engine src/driver.cpp ${LIB_SOURCES})
 add_executable(Test test/main_test.cpp ${LIB_SOURCES})
+add_executable(Pst pst_main.cpp ${LIB_SOURCES})
 
 
 include_directories(

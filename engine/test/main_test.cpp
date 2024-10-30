@@ -203,10 +203,19 @@ void test_engine_takes_king(bool debug=false){
 	std::cout << "test_engine_takes_king(): passed\n";
 }
 
+void test_read_psts(){
+	PstManager read_psts;
+	PstManager generated_psts;
+	generated_psts.generate_psts();
+	assert(generated_psts == read_psts);
+}
+
 
 void time_for_dfs(int depth){
 	int iterations = 100;
-	int total = 0;
+	std::cout << "Calculating search time at depth " << depth << " for " << iterations << " iterations\n";
+	int total_search_time = 0;
+	int total_startup_time = 0;
 	for (int i=0; i < iterations; ++i){
 		using namespace std::chrono;
 		auto start = high_resolution_clock::now();
@@ -214,19 +223,19 @@ void time_for_dfs(int depth){
 		auto end = high_resolution_clock::now();
 		auto duration = duration_cast<milliseconds>(end - start);
 		auto count = duration.count();
-		std::cout << "Startup time: " << count << "ms\n";
-		std::cout << "Start\n";
+		total_startup_time += count;
 		start = high_resolution_clock::now();
 		Move* _ = engine_move(board, depth);
 		end = high_resolution_clock::now();
-		std::cout << "End\n";
 		duration = duration_cast<milliseconds>(end - start);
 		count = duration.count();
-		std::cout << "Count: " << count << "\n";
-		total += count;
+		total_search_time += count;
+		std::cout << "\rIteration " << i+1 << "/" << iterations << std::flush;
 	}
-	std::cout << "Time for search at depth " << depth << ": " << static_cast<float>(total) / iterations << "ms\n";
+	std::cout << "Time for startup: " << static_cast<float>(total_search_time) / iterations << "ms\n";
+	std::cout << "Time for search at depth " << depth << ": " << static_cast<float>(total_startup_time) / iterations << "ms\n";
 }
+
 
 
 int main(){
@@ -238,6 +247,7 @@ int main(){
 	test_make_moves();
 	test_engine_takes_king(true);
 	*/
+	//test_read_psts();
 	time_for_dfs(4);
 	std::cout << "passed all tests\n";
 }

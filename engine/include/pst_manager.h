@@ -14,14 +14,18 @@ typedef struct FastPst {
 } FastPst;
 
 
+static const std::string pst_filename = "generated/pst";
 
 class PstManager {
 public:
 	PstManager();
 	int evaluate_piece(bitboard b, int pst_index);
+	void write_psts();
+	void generate_psts();
+	friend bool operator==(const PstManager& a, const PstManager& b);
 private:
-	void init_pst();
-	void init_fast_pst(int* pst, int copy_index);
+	void read_psts();
+	void generate_fast_pst(int* pst, int copy_index);
 	int slow_evaluate_piece(bitboard b, int pst_index, int* pst);
 	int piece_evals[12];
 

@@ -1,6 +1,8 @@
 #include "pst_manager.h"
 #include "board_types.h"
 #include "prettyboard.h"
+#include <iostream>
+#include <fstream>
 
 
 int PST_K[64] {
@@ -126,8 +128,9 @@ int PST_p[64] {
 };
 
 PstManager::PstManager(){
-  init_pst();
+  read_psts();
 }
+
 
 FastPst::FastPst(){
   most_significant = new int[1 << 16];
@@ -146,33 +149,150 @@ FastPst::~FastPst(){
 }
 
 
+void PstManager::read_psts() {
+  std::ifstream pst_file;
+  pst_file.open(pst_filename);
+  for (int pst=0; pst < 12; ++pst){
+    std::string array_string;
+    std::string array_value_string;
+    FastPst fast_pst = fast_psts[pst];
+    for (int i=0; i < 65536; ++i){
+      pst_file >> array_value_string;
+      //std::cout << "Most significant at index " << i << ": " << array_value_string << "\n";
+      fast_pst.most_significant[i] = std::stoi(array_value_string);
+    }
+    pst_file >> array_string;
+    if (array_string != "ARR_END"){
+      std::cout << "Not reading ARR_END\n";
+    }
+    for (int i=0; i < 65536; ++i){
+      pst_file >> array_value_string;
+      fast_pst.upper[i] = std::stoi(array_value_string);
+    }
+    pst_file >> array_string;
+    if (array_string != "ARR_END"){
+      std::cout << "Not reading ARR_END\n";
+    }
+    for (int i=0; i < 65536; ++i){
+      pst_file >> array_value_string;
+      fast_pst.lower[i] = std::stoi(array_value_string);
+    }
+    pst_file >> array_string;
+    if (array_string != "ARR_END"){
+      std::cout << "Not reading ARR_END\n";
+    }
+    for (int i=0; i < 65536; ++i){
+      pst_file >> array_value_string;
+      fast_pst.least_significant[i] = std::stoi(array_value_string);
+    }
+    pst_file >> array_string;
+    if (array_string != "ARR_END"){
+      std::cout << "Not reading ARR_END\n";
+    }
+    pst_file >> array_string;
+    if (array_string != "PST_END"){
+      std::cout << "Not reading PST_END\n";
+    }
 
-void PstManager::init_pst(){
+
+  }
+}
+
+void PstManager::write_psts(){
+  std::ofstream pst_file;
+  pst_file.open(pst_filename);
+  for (int pst=0; pst < 12; ++pst){
+    FastPst fast_pst = fast_psts[pst];
+
+    for (int i=0; i < 65536; ++i){
+      pst_file << fast_pst.most_significant[i] << "\n";
+    }
+    pst_file << "ARR_END\n";
+
+    for (int i=0; i < 65536; ++i){
+      pst_file << fast_pst.upper[i] << "\n";
+    }
+    pst_file << "ARR_END\n";
+
+    for (int i=0; i < 65536; ++i){
+      pst_file << fast_pst.lower[i] << "\n";
+    }
+    pst_file << "ARR_END\n";
+
+    for (int i=0; i < 65536; ++i){
+      pst_file << fast_pst.least_significant[i] << "\n";
+    }
+    pst_file << "ARR_END\n";
+    pst_file << "PST_END\n";
+
+  }
+
+}
+
+
+bool operator==(const PstManager& a, const PstManager& b){
+  int line = 0;
+  for (int pst=0; pst < 12; ++pst){
+    FastPst fast_pst_a = a.fast_psts[pst];
+    FastPst fast_pst_b = b.fast_psts[pst];
+
+    for (int i=0; i < 65536; ++i){
+      line++;
+      if (fast_pst_a.most_significant[i] != fast_pst_b.most_significant[i]){
+        std::cout << "Error in most significant on line " << line << "\n";
+        std::cout << "A: " << fast_pst_a.most_significant[i] << "\n";
+        std::cout << "B: " << fast_pst_b.most_significant[i] << "\n";
+        return false;
+      }
+      if (fast_pst_a.upper[i] != fast_pst_b.upper[i]){
+        std::cout << "Error in upper on line " << line << "\n";
+        std::cout << "A: " << fast_pst_a.upper[i] << "\n";
+        std::cout << "B: " << fast_pst_b.upper[i] << "\n";
+        return false;
+      }
+      if (fast_pst_a.lower[i] != fast_pst_b.lower[i]){
+        std::cout << "Error in lower on line " << line << "\n";
+        std::cout << "A: " << fast_pst_a.lower[i] << "\n";
+        std::cout << "B: " << fast_pst_b.lower[i] << "\n";
+        return false;
+      }
+      if (fast_pst_a.least_significant[i] != fast_pst_b.least_significant[i]){
+        std::cout << "Error in least significant on line " << line << "\n";
+        std::cout << "A: " << fast_pst_a.least_significant[i] << "\n";
+        std::cout << "B: " << fast_pst_b.least_significant[i] << "\n";
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+void PstManager::generate_psts(){
   piece_evals[0] = 20000;
   piece_evals[1] = 800;
   piece_evals[2] = 500;
   piece_evals[3] = 315;
   piece_evals[4] = 300;
   piece_evals[5] = 100;
-  piece_evals[6] = -2000;
+  piece_evals[6] = -20000;
   piece_evals[7] = -800;
   piece_evals[8] = -500;
   piece_evals[9] = -315;
   piece_evals[10] = -300;
   piece_evals[11] = -100;
 
-  init_fast_pst(PST_K, 0);
-  init_fast_pst(PST_Q, 1);
-  init_fast_pst(PST_R, 2);
-  init_fast_pst(PST_B, 3);
-  init_fast_pst(PST_N, 4);
-  init_fast_pst(PST_P, 5);
-  init_fast_pst(PST_k, 6);
-  init_fast_pst(PST_q, 7);
-  init_fast_pst(PST_r, 8);
-  init_fast_pst(PST_b, 9);
-  init_fast_pst(PST_n, 10);
-  init_fast_pst(PST_p, 11);
+  generate_fast_pst(PST_K, 0);
+  generate_fast_pst(PST_Q, 1);
+  generate_fast_pst(PST_R, 2);
+  generate_fast_pst(PST_B, 3);
+  generate_fast_pst(PST_N, 4);
+  generate_fast_pst(PST_P, 5);
+  generate_fast_pst(PST_k, 6);
+  generate_fast_pst(PST_q, 7);
+  generate_fast_pst(PST_r, 8);
+  generate_fast_pst(PST_b, 9);
+  generate_fast_pst(PST_n, 10);
+  generate_fast_pst(PST_p, 11);
 }
 
 bitboard pst_lsb_index(bitboard b){
@@ -198,7 +318,7 @@ int PstManager::slow_evaluate_piece(bitboard b, int pst_index, int* pst){
   return eval;
 
 }
-void PstManager::init_fast_pst(int* pst, int piece_index){
+void PstManager::generate_fast_pst(int* pst, int piece_index){
 
   FastPst fast_pst = fast_psts[piece_index];
 
