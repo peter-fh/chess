@@ -39,7 +39,7 @@ generated/
 /main
 
 # CMake build directory
-cmake/
+build/
 
 # CLangD cache directory
 .cache/

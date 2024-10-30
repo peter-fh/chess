@@ -1,7 +1,7 @@
 #!/bin/bash
 
-mkdir -p cmake 
-cd cmake 
+mkdir -p build 
+cd build 
 cmake .. -DENGINE=True
 make
 cd ..
