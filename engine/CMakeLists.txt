@@ -8,7 +8,7 @@ project (
 )
 
 include_directories(
-	"./include"
+	PUBLIC "./include"
 	"./test"
 )
 
@@ -22,10 +22,7 @@ file(GLOB TEST_SOURCES "test/*.cpp")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if (ENGINE)
-	message("Building engine executable")
-	add_executable(Engine src/engine_main.cpp ${LIB_SOURCES})
-elseif (PST)
+if (PST)
 	message("Building pst executable")
 	add_executable(Pst src/pst_main.cpp ${LIB_SOURCES})
 elseif (TEST)
@@ -34,7 +31,12 @@ elseif (TEST)
 	)
 	add_executable(Test test/test_main.cpp ${LIB_SOURCES} ${TEST_SOURCES})
 else ()
-	message("ERROR: Please specify an entrypoint")
+	message("Building engine executable")
+	add_library(Engine SHARED ${LIB_SOURCES})
+	target_include_directories(Engine
+		PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/include
+	)
 endif()
 
 

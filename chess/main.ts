@@ -90,8 +90,11 @@ function placePiece(e: MouseEvent){
 	throw new Error("Attempting to move piece that is null in board representation");
     }
 
-    if (state.board.attemptMove(moved_piece, from, to) && state.log_mode){
-	logBoard();
+    if (state.board.attemptMove(moved_piece, from, to)){
+	getEngineMove();
+	if (state.log_mode){
+	    logBoard();
+	}
     }
     drawBoard();
 }
@@ -111,6 +114,21 @@ function logBoard(){
 	})
 }
 
+async function getEngineMove(){
+    const current_fen: string = state.board.fen();
+    const response = await fetch("/engine", {
+	method: "POST",
+	headers: {
+	    "Board": current_fen,
+	},
+    })
+    if (!response.ok){
+	throw new Error("Response failed: " + response.status);
+    }
+
+    const result = await response.text();
+    console.log(result)
+}
 
 function getBoardIndex(i: number): number {
     if (state.flipped){

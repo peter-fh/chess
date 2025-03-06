@@ -840,7 +840,6 @@ export class Board {
 		if (from != ' ' && this.isFriendly(from)){
 		    const move = this.isLegal(from, i, j);
 		    if (move.is_legal && !move.is_castle){
-			console.log("is not castle")
 			var move_code = "";
 			move_code += from.type;
 			move_code += Board.intToSquare(j);

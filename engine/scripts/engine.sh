@@ -5,3 +5,4 @@ cd build
 cmake .. -DENGINE=True
 make
 cd ..
+./build/Engine "$1"

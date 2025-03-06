@@ -19,7 +19,9 @@ Board::Board(){
 }
 
 Board::Board(std::string fen){
+	std::cout << "board constructor\n";
 	pst_manager = new PstManager;
+	exit(0);
 	for (int i=0; i < 12; i++){
 		pieces[i] = 0ULL;
 	}
@@ -45,6 +47,7 @@ Board::Board(std::string fen, PstManager* inp_pst_manager){
 	for (int i=0; i < 12; i++){
 		pieces[i] = 0ULL;
 	}
+	exit(0);
 	this->init_from_fen(fen);
 	set_sided_bitboards();
 	init_msbs();
@@ -79,6 +82,7 @@ int Board::square_to_int(std::string square){
 void Board::init_from_fen(std::string fen){
 	int i = 0;
 	int square = 63;
+	std::cout << "building board\n";
 	for (char c; (c=fen[i]) != ' '; ++i){
 		if (isdigit(c)){
 			square -= c - '0';
@@ -89,6 +93,7 @@ void Board::init_from_fen(std::string fen){
 		}
 	}
 	++i;
+	std::cout << "Built board\n";
 
 	std::string turn = "";
 	for (char c; (c=fen[i]) != ' '; ++i){
