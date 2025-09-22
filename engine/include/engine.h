@@ -1,7 +1,12 @@
 #include "board.h"
-#include "search.h"
 
-extern "C"
-{
-	char* run_engine(char* )
+class Engine {
+public:
+	Engine();
+	std::string run(std::string fen);
+private:
+	const Rays rays;
+	const PstManager* pst_manager;
+	const std::array<uint16_t, 65536> weights;
+	const std::array<uint16_t, 65536> msbs;
 }

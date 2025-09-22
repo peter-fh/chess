@@ -46,15 +46,13 @@ Move* dfs_root(Board& board, int depth){
 }
 
 
-const char* engine_move(char* board_fen, int depth){
+std::string engine_move(std::string board_fen, int depth){
 	Board board(board_fen);
 	Move* move = dfs_root(board, depth);
 	std::ostringstream oss;
 	oss << move;
 	std::string out = oss.str();
-	char* result = new char[out.size() + 1];
-	std::strcpy(result, out.c_str());
-	return result;
+	return out;
 }
 
 

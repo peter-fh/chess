@@ -1,5 +1,6 @@
 #ifndef BOARD_H
 #define BOARD_H
+#include <cstdint>
 #include <string>
 #include "chess_types.h"
 #include "rays.h"
@@ -23,6 +24,13 @@ public:
 	Board(std::string fen);
 	Board(PstManager* pst_manager);
 	Board(std::string fen, PstManager* pst_manager);
+	Board(
+		std::string fen, 
+		PstManager* pst_manager, 
+		Rays* rays,
+		std::array<uint16_t, 65536> weights,
+		std::array<uint16_t, 65536> msbs
+	);
 
 	Moves* get_moves();
 	Move* make_next_move(Moves* moves);
@@ -42,7 +50,7 @@ private:
 	void change_turn();
 	void init_from_fen(std::string fen);
 	void set_sided_bitboards();
-	bitboard directional_move(bitboard piece, Rays& rays, int bit_func_type, bitboard ray_func(Rays&, bitboard));
+	bitboard directional_move(bitboard piece, Rays* rays, int bit_func_type, bitboard ray_func(Rays*, bitboard));
 	bitboard get_positive_move(bitboard piece, int direction);
 
 
@@ -62,7 +70,6 @@ private:
 	bitboard phantom_pawn;
 	int piece_index_adder;
 	GameState state;
-	Rays rays;
 
 	bitboard get_north_moves(bitboard piece);
 	bitboard get_northeast_moves(bitboard piece);
@@ -83,8 +90,9 @@ private:
 
 	void init_weights();
 	void init_msbs();
-	uint16_t weights[65536];
-	uint16_t msbs[65536];
+	std::array<uint16_t, 65536> weights;
+	std::array<uint16_t, 65536> msbs;
+	Rays* rays;
 	PstManager* pst_manager;
 
 };

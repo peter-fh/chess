@@ -54,6 +54,28 @@ Board::Board(std::string fen, PstManager* inp_pst_manager){
 	init_weights();
 }
 
+Board::Board(
+		std::string fen, 
+		PstManager* inp_pst_manager, 
+		Rays* inp_rays,
+		std::array<uint16_t, 65536> weights,
+		std::array<uint16_t, 65536> inp_msbs
+	){
+
+	pst_manager = inp_pst_manager;
+	rays = inp_rays;
+	for (int i=0; i < 12; i++){
+		pieces[i] = 0ULL;
+	}
+	this->init_from_fen(fen);
+	set_sided_bitboards();
+
+	msbs = inp_msbs;
+	init_msbs();
+	init_weights();
+
+}
+
 void Board::init_weights(){
 	for (int i=0; i < 65536; ++i){
 		weights[i] = slow_hamming_weight(i);
@@ -275,18 +297,6 @@ void Board::set_sided_bitboards(){
 	}
 
 
-}
-
-std::ostream& _operator(std::ostream& out, const Move& move){
-
-	int move_to = msb_index(move.to);
-	std::string move_word = "";
-	std::cout << "Move index: " << move.index << "\n";
-	move_word += piece_map[move.index];
-	move_word += Board::int_to_square(move_to);
-	move_word += " ";
-	out << move_word;
-	return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const Move& move){
